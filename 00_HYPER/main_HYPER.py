@@ -35,7 +35,7 @@ if loc == "JP" and ver == 1:
     file_tot_num  = 135
     varssim_dir = f"hyper/data/MERVJP/varssim_nocal/ver1_1"
 elif loc == "JP" and ver == 2:
-    file_tot_num = 87
+    file_tot_num = 20#87
     varssim_dir = f"hyper/data/MERVJP/varssim_nocal/ver2_0"
 
 file_list = list(range(1, file_tot_num+1))
@@ -206,31 +206,26 @@ for file_num in file_list:
     Wout, reservoir = model.train(input_cal, target_data=error_target_cal, washout=washout, ridge_param=ridge_param)
 
 
+    """
     reservoir_row = np.concatenate(([f'file_{file_num}'], reservoir.flatten()))
     reservoir_df = pd.DataFrame([reservoir_row])
     if file_num == 1:
         reservoir_df.to_csv(output_dir + f"/reservoir/HYPER_reservoir{file_tag}.csv", mode='w', index=False, header=False)
     else:
         reservoir_df.to_csv(output_dir + f"/reservoir/HYPER_reservoir{file_tag}.csv", mode='a', index=False, header=False)
+    """
 
     # Wout (1,R)
     # reservoir (R, )
 
+    """
     Wout_row = np.concatenate(([f'file_{file_num}'], Wout.flatten()))
     Wout_df = pd.DataFrame([Wout_row])
     if file_num == 1:
         Wout_df.to_csv(output_dir + f"/Wout/HYPER_Wout{file_tag}.csv", mode='w', index=False, header=False)
     else:
         Wout_df.to_csv(output_dir + f"/Wout/HYPER_Wout{file_tag}.csv", mode='a', index=False, header=False)
-
-    end_time = datetime.now()
-    end_time_st = end_time.strftime("%a %b %d %I:%M:%S %p JST %Y")
-    log_file.write(f"end: {end_time_st}\n")
-    log_file.write(f"elapsed: {end_time - start_time}\n")
-
-    start_time_pred = datetime.now()
-    start_time_pred_st = start_time_pred.strftime("%a %b %d %I:%M:%S %p JST %Y")
-    log_file.write(f"pred start: {start_time_pred_st}\n")
+    """
 
     # input_eva <- 0~m-1, knwbsd_sim <- 0~m-1
     ### PREDICTIONS OF ERRORS ###
@@ -245,11 +240,6 @@ for file_num in file_list:
 
     predict_cal[predict_cal < 0] = 0
     predict_eva[predict_eva < 0] = 0
-
-    end_time_pred = datetime.now()
-    end_time_pred_st = end_time_pred.strftime("%a %b %d %I:%M:%S %p JST %Y")
-    log_file.write(f"pred end: {end_time_pred_st}\n")
-    log_file.write(f"pred elapsed: {end_time_pred - start_time_pred}\n")
 
     #print(predict_cal)
     #print(predict_eva)

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def run_BC(model, file_list, bma_df_cal_og, bma_df_eva_og, varssim_dir, start_date_cal, end_date_cal, start_date_eva, end_date_eva, loc, output_dir, washout, ridge_param, spin, nexttime, benchmark_list):
+def run_BC(model, file_list, bma_df_cal_og, bma_df_eva_og, varssim_dir, start_date_cal, end_date_cal, start_date_eva, end_date_eva, loc, output_dir, washout, ridge_param, nexttime, benchmark_list):
     results_cal = []
     results_eva = []
     W_out_rows = []
@@ -52,7 +52,7 @@ def run_BC(model, file_list, bma_df_cal_og, bma_df_eva_og, varssim_dir, start_da
         # precip_eva:  INPUT OF THE ESN , EX; PRECIPITATION, TEMPERATURE, OTHER INPUTS
         # obs_eva: EVALUATE THE TEST OBSERVED, SHIFTED ONE TIMESTEP OF TRAIN DATA TO PREDICT,EX: OBSERVED FLOW
 
-        W_out, reservoir = model.train(input_train_cal, target_data=error_train_target_cal, washout=washout, ridge_param=ridge_param, spinoff = spin)
+        W_out, reservoir = model.train(input_train_cal, target_data=error_train_target_cal, washout=washout, ridge_param=ridge_param)
 
         W_out_row = np.concatenate(([f'file_{file_num}'], W_out.flatten()))
         W_out_rows.append(W_out_row)

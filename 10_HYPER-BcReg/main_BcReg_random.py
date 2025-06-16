@@ -71,13 +71,11 @@ elif loc == "JP" and ver == 2:
 
     #test_basins_list = [4,11,24,34,40,45,70,77,84] # chosen sequentially based on the file_num when sorted the river basins by latitude 4,14,24,,,
     test_basins_list = [4,8,11,18,24,28,32,40,45,50,54,59,65,70,77,82,84]
-    #train_basin_int_list = [30,20,15,10,5,3]
-    #train_basin_int_list = [70,50,30]
-    train_basin_int_list = [20,10,5,3]
+    train_basin_int_list = [70,50,30,20,15,10,5,3]
 
     basin_data_df = pd.read_csv("hyper/data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
-    attribute_values = pd.read_csv(f'{attribute_dir}/basin_data_JP_cleaned_limited.csv', encoding= 'UTF-8') # File_num: 1~135
-    columns_drop = ['File_num','grdc_no','river','station','lat_org','long_org']
+    attribute_values = pd.read_csv(f'{attribute_dir}/basin_data_limited_met&soil&geology&land_{ver_name}.csv', encoding= 'UTF-8') # File_num: 1~135
+    columns_drop = ['File_num','grdc_no','river','station','lat_org','long_org','WaterArea','ForestArea','ForestAreaRatio','WaterAreaRatio','land_GolfCourse','land_GolfCourse_Ratio']
 
 
 varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"

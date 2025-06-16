@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import os
 
-def run_BC_pre_PCA(model, file_list, loc, output_dir, bma_cal_og, bma_eva_og, start_date_cal, end_date_cal, start_date_eva, end_date_eva, benchmark_list, file_tag, washout, ridge_param, spin, nexttime, varssim_dir, log_file=None):
+def run_BC_pre_PCA(model, file_list, loc, output_dir, bma_cal_og, bma_eva_og, start_date_cal, end_date_cal, start_date_eva, end_date_eva, benchmark_list, file_tag, washout, ridge_param, nexttime, varssim_dir, log_file=None):
     result_cal_og = []
     result_eva_og = []
     W_out_og_rows = []
@@ -60,7 +60,7 @@ def run_BC_pre_PCA(model, file_list, loc, output_dir, bma_cal_og, bma_eva_og, st
 
         #############################
         # CALIBRATION
-        W_out_og, reservoir_og = model.train(input_cal_og, target_data=error_target_cal_og, washout=washout, ridge_param=ridge_param, spinoff=spin)
+        W_out_og, reservoir_og = model.train(input_cal_og, target_data=error_target_cal_og, washout=washout, ridge_param=ridge_param)
         W_out_og_row = np.concatenate(([f'file_{file_num}'], W_out_og.flatten()))
         W_out_og_rows.append(W_out_og_row)
         
