@@ -1,7 +1,7 @@
 # Description: Main script for running the ESN model on multiple files.
 import matplotlib
 matplotlib.use('Agg')
-from esn_BC_PUB import ESN
+from esn_BcProx import ESN
 import pandas as pd
 import numpy as np
 from numpy.ma import masked_array
@@ -9,7 +9,7 @@ from datetime import datetime
 import os
 import random
 import sys
-from run_BC_PUB_random import run_BC, BMK, load_data, BayesianModelAveraging, split
+from run_BcProx_random import run_BC, BMK, load_data, BayesianModelAveraging, split
 
 #####################
 benchmark_list = ["KGE","NSE","E1","VE", "d","RMSE","MAE"]
@@ -157,13 +157,13 @@ model = ESN(input_size=input_size,
             input_scale=0.5)
 
 if non_arid_files:
-    output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BC_PUB_random_non_distributed_{reservoir_size}_{ridge_param}_non_arid'
+    output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BcProx_random_non_distributed_{reservoir_size}_{ridge_param}_non_arid'
 else:
-    output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BC_PUB_random_non_distributed_{reservoir_size}_{ridge_param}'
+    output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BcProx_random_non_distributed_{reservoir_size}_{ridge_param}'
 os.makedirs(output_base_dir, exist_ok=True)
-if os.path.exists(output_base_dir + f'/BC_PUB_random_log.txt'):
-    open(output_base_dir + f'/BC_PUB_random_log.txt', 'w').close()
-log_file = open(output_base_dir + f'/BC_PUB_random_log.txt', 'a')
+if os.path.exists(output_base_dir + f'/BcProx_random_log.txt'):
+    open(output_base_dir + f'/BcProx_random_log.txt', 'w').close()
+log_file = open(output_base_dir + f'/BcProx_random_log.txt', 'a')
 
 param_file_path = os.path.join(output_base_dir, 'parameters.txt')
 with open(param_file_path, 'w') as param_file:
@@ -277,31 +277,31 @@ for train_basin_int in train_basin_int_list:
                     test_date_row_eva = list(['Date'] + [str(date.date()) for date in predict_test_eva_dates])
                     test_predict_eva_df = pd.DataFrame([test_date_row_eva])
 
-                    test_predict_eva_df.to_csv(output_dir + f"/test_basin/predict/BC_PUB_predict{file_tag}_eva.csv", mode='w', index=False, header=False)
+                    test_predict_eva_df.to_csv(output_dir + f"/test_basin/predict/BcProx_predict{file_tag}_eva.csv", mode='w', index=False, header=False)
 
-                with open(output_dir + f"/test_basin/predict/BC_PUB_predict{file_tag}_eva.csv", 'a') as file:
+                with open(output_dir + f"/test_basin/predict/BcProx_predict{file_tag}_eva.csv", 'a') as file:
                     pd.DataFrame([test_file_row_eva]).to_csv(file, header=False, index=False)
 
                 file_results_test_eva = {'file_num': predict_file_num}
                 target_test_eva = np.concatenate((df_test_eva['Obs flow'].values[1:],)) #1089
                 for benchmark in benchmark_list:
                     file_results_test_eva.update({
-                        f'BC_PUB{file_tag}_{benchmark}_eva': BMK(target_test_eva, predict_test_eva, benchmark)
+                        f'BcProx{file_tag}_{benchmark}_eva': BMK(target_test_eva, predict_test_eva, benchmark)
                     })  
 
                 results_test_eva.append(file_results_test_eva)
 
         ### ONLY FOR TRAINING BASINS ###
         #df_results_train_cal = pd.DataFrame(results_train_cal)
-        #df_results_train_cal.to_csv(output_dir + f'/train_basin/results/BC_PUB_results{file_tag}_cal.csv', index=False)
+        #df_results_train_cal.to_csv(output_dir + f'/train_basin/results/BcProx_results{file_tag}_cal.csv', index=False)
         #df_results_train_eva = pd.DataFrame(results_train_eva)
-        #df_results_train_eva.to_csv(output_dir + f'/train_basin/results/BC_PUB_results{file_tag}_eva.csv', index=False)
+        #df_results_train_eva.to_csv(output_dir + f'/train_basin/results/BcProx_results{file_tag}_eva.csv', index=False)
 
         ### FOR TEST BASINS ###
         df_results_test_eva = pd.DataFrame(results_test_eva)
-        df_results_test_eva.to_csv(output_dir + f'/test_basin/results/BC_PUB_results{file_tag}_eva.csv', index=False)
+        df_results_test_eva.to_csv(output_dir + f'/test_basin/results/BcProx_results{file_tag}_eva.csv', index=False)
 
-        print(f"BC_PUB{file_tag} is done!")
+        print(f"BcProx{file_tag} is done!")
 
         end_time = datetime.now()
         end_time_st = end_time.strftime("%a %b %d %I:%M:%S %p JST %Y")

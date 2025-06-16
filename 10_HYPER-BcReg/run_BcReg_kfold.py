@@ -364,28 +364,13 @@ def BMK(obs_data, sim_data, benchmark):
         sim_ave = np.mean(sim_data)
         obs_std = np.std(obs_data, axis=0)  # Specify axis=0
         sim_std = np.std(sim_data, axis=0)  # Specify axis=0
-        #obs_std = 1e-6 if obs_std == 0 else obs_std
-        #obs_ave = 1e-6 if obs_ave == 0 else obs_ave
+        obs_std = 1e-6 if obs_std == 0 else obs_std
+        obs_ave = 1e-6 if obs_ave == 0 else obs_ave
         return 1 - np.sqrt((r - 1)**2 + ((sim_std / obs_std) - 1)**2 + ((sim_ave / obs_ave) - 1)**2)
-    
-    elif benchmark == "logNSE":
-        temp_obs_data = np.where((obs_data <= 0) | np.isnan(obs_data), 1e-6, obs_data)
-        temp_sim_data = np.where((sim_data <= 0) | np.isnan(sim_data), 1e-6, sim_data)
-        obs_ave = np.mean(temp_obs_data)
-        numer = np.sum((np.log(temp_sim_data) - np.log(temp_obs_data))**2)
-        denom = np.sum((np.log(temp_obs_data) - np.log(obs_ave))**2)
-        return 1 - numer / denom
     
     elif benchmark == "E1":
         obs_ave = np.mean(obs_data)
         return 1 - (np.sum(np.abs(obs_data - sim_data)) / np.sum(np.abs(obs_data - obs_ave)))
-    
-    elif benchmark == "Erel":
-        obs_ave = np.mean(obs_data)
-        temp_obs_data = np.where(obs_data == 0, 1e-6, obs_data)
-        numer = np.sum(np.square((temp_obs_data - sim_data) / temp_obs_data))
-        denom = np.sum(np.square((obs_data - obs_ave) / obs_ave))
-        return 1 - numer / denom
     
     elif benchmark == "VE":
         return 1 - np.sum(np.abs(obs_data - sim_data), axis=0) / np.sum(obs_data, axis=0)  # Specify axis=0
@@ -394,6 +379,8 @@ def BMK(obs_data, sim_data, benchmark):
         obs_ave = np.mean(obs_data)
         numer = np.sum(np.square(obs_data - sim_data))
         denom = np.sum(np.square(np.abs(sim_data - obs_ave) + np.abs(obs_data - obs_ave)))
+        if denom == 0:
+            return float('nan')
         return 1 - numer / denom
     
     elif benchmark == "RMSE":
@@ -401,7 +388,6 @@ def BMK(obs_data, sim_data, benchmark):
     
     elif benchmark == "MAE":
         return np.mean(np.abs(obs_data - sim_data))
-
 def weight_vector(bma_weights_df, RC_weights_df, reservoir_size, model_list, file_list):
     variable_names = variable_names_list(model_list, reservoir_size)
 

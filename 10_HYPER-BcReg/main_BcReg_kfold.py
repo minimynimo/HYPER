@@ -3,8 +3,8 @@
 # selects the training basin at random.  The selection is to be as evenly to chosen as possible(create equaly parted sections to select one value)
 import matplotlib
 matplotlib.use('Agg')
-from esn_BC_PCA_lasso_PUB import ESN
-from run_BC_PCA_PUB_kfold import weight_vector, run_BC_pre_PCA, PCA_lasso, run_BC_post_PCA, BayesianModelAveraging
+from esn_BcReg import ESN
+from run_BcReg_kfold import weight_vector, run_BC_pre_PCA, PCA_lasso, run_BC_post_PCA, BayesianModelAveraging
 import os
 import pandas as pd 
 import numpy as np

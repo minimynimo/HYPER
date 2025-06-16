@@ -1,13 +1,13 @@
 # Description: Main script for running the ESN model on multiple files.
 import matplotlib
 matplotlib.use('Agg')
-from esn_BC_PUB import ESN
+from esn_BcProx import ESN
 import pandas as pd
 import numpy as np
 from numpy.ma import masked_array
 from datetime import datetime
 import os
-from run_BC_PUB import BMK, load_data, BayesianModelAveraging
+from run_BcProx import BMK, load_data, BayesianModelAveraging
 
 #####################
 benchmark_list = ["KGE","NSE","logNSE","E1","VE", "d","RMSE","MAE"]
@@ -123,7 +123,7 @@ model = ESN(input_size=input_size,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 
-output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BC_PUB_{reservoir_size}_{ridge_param}{non_arid_buf}'
+output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BcProx_{reservoir_size}_{ridge_param}{non_arid_buf}'
 os.makedirs(output_base_dir, exist_ok=True)
 param_file_path = os.path.join(output_base_dir, 'parameters.txt')
 with open(param_file_path, 'w') as param_file:
@@ -175,9 +175,9 @@ for region in region_list:
     bma_df_eva_og = pd.DataFrame(bma_df_eva_og)
     bma_weights_og = pd.DataFrame(bma_weights_og)
 
-    if os.path.exists(output_dir + f'/BC_PUB{file_tag}_log.txt'):
-        open(output_dir + f'/BC_PUB{file_tag}_log.txt', 'w').close()
-    log_file = open(output_dir + f'/BC_PUB{file_tag}_log.txt', 'a')
+    if os.path.exists(output_dir + f'/BcProx{file_tag}_log.txt'):
+        open(output_dir + f'/BcProx{file_tag}_log.txt', 'w').close()
+    log_file = open(output_dir + f'/BcProx{file_tag}_log.txt', 'a')
 
     for file_num in train_basins: # go through only the training basins
         print("training: ", file_num)
@@ -250,7 +250,7 @@ for region in region_list:
         # reservoir (R, )
 
         #W_out_df = pd.DataFrame(W_out)
-        #W_out_df.to_csv(f"/data0/funato/0_out/99_out/{loc}/BC_PUB/W_out_file_{file_num}.csv", index=False)
+        #W_out_df.to_csv(f"/data0/funato/0_out/99_out/{loc}/BcProx/W_out_file_{file_num}.csv", index=False)
         error_train_cal = model.predict(reservoir, input_train_cal, ptb_func=None, ptb_scale=1.0, nexttime=nexttime, extended_interval=10)
         error_train_eva = model.predict(reservoir, input_train_eva, ptb_func=None, ptb_scale=1.0, nexttime=nexttime, extended_interval=10)
 
@@ -273,12 +273,12 @@ for region in region_list:
             train_predict_cal_df = pd.DataFrame([train_date_row_cal])
             train_predict_eva_df = pd.DataFrame([train_date_row_eva])
 
-            train_predict_cal_df.to_csv(output_dir + f"/train_basin/predict/BC_PUB_predict{file_tag}_cal.csv", mode='w', index=False, header=False)
-            train_predict_eva_df.to_csv(output_dir + f"/train_basin/predict/BC_PUB_predict{file_tag}_eva.csv", mode='w', index=False, header=False)
+            train_predict_cal_df.to_csv(output_dir + f"/train_basin/predict/BcProx_predict{file_tag}_cal.csv", mode='w', index=False, header=False)
+            train_predict_eva_df.to_csv(output_dir + f"/train_basin/predict/BcProx_predict{file_tag}_eva.csv", mode='w', index=False, header=False)
 
-        with open(output_dir + f"/train_basin/predict/BC_PUB_predict{file_tag}_cal.csv", 'a') as file:
+        with open(output_dir + f"/train_basin/predict/BcProx_predict{file_tag}_cal.csv", 'a') as file:
             pd.DataFrame([train_file_row_cal]).to_csv(file, header=False, index=False)
-        with open(output_dir + f"/train_basin/predict/BC_PUB_predict{file_tag}_eva.csv", 'a') as file:
+        with open(output_dir + f"/train_basin/predict/BcProx_predict{file_tag}_eva.csv", 'a') as file:
             pd.DataFrame([train_file_row_eva]).to_csv(file, header=False, index=False)
 
         file_results_train_cal = {'file_num': file_num}
@@ -286,10 +286,10 @@ for region in region_list:
 
         for benchmark in benchmark_list:
             file_results_train_cal.update({
-                f'BC_PUB{file_tag}_{benchmark}_cal': BMK(target_train_cal, train_predict_cal, benchmark)
+                f'BcProx{file_tag}_{benchmark}_cal': BMK(target_train_cal, train_predict_cal, benchmark)
             })
             file_results_train_eva.update({
-                f'BC_PUB{file_tag}_{benchmark}_eva': BMK(target_train_eva, train_predict_eva, benchmark)
+                f'BcProx{file_tag}_{benchmark}_eva': BMK(target_train_eva, train_predict_eva, benchmark)
             })
 
         results_train_cal.append(file_results_train_cal)
@@ -337,16 +337,16 @@ for region in region_list:
                 test_date_row_eva = list(['Date'] + [str(date.date()) for date in predict_test_eva_dates])
                 test_predict_eva_df = pd.DataFrame([test_date_row_eva])
 
-                test_predict_eva_df.to_csv(output_dir + f"/test_basin/predict/BC_PUB_predict{file_tag}_eva.csv", mode='w', index=False, header=False)
+                test_predict_eva_df.to_csv(output_dir + f"/test_basin/predict/BcProx_predict{file_tag}_eva.csv", mode='w', index=False, header=False)
 
-            with open(output_dir + f"/test_basin/predict/BC_PUB_predict{file_tag}_eva.csv", 'a') as file:
+            with open(output_dir + f"/test_basin/predict/BcProx_predict{file_tag}_eva.csv", 'a') as file:
                 pd.DataFrame([test_file_row_eva]).to_csv(file, header=False, index=False)
 
             file_results_test_eva = {'file_num': predict_file_num}
             target_test_eva = np.concatenate((df_test_eva['Obs flow'].values[1:],)) #1089
             for benchmark in benchmark_list:
                 file_results_test_eva.update({
-                    f'BC_PUB{file_tag}_{benchmark}_eva': BMK(target_test_eva, predict_test_eva, benchmark)
+                    f'BcProx{file_tag}_{benchmark}_eva': BMK(target_test_eva, predict_test_eva, benchmark)
                 })  
 
             results_test_eva.append(file_results_test_eva)
@@ -362,17 +362,17 @@ for region in region_list:
     log_file.close()
 
     W_out_df = pd.DataFrame(W_out_rows)
-    W_out_df.to_csv(output_dir + f"/train_basin/Wout/BC_PUB_W_out{file_tag}.csv", index=False, header=False)
+    W_out_df.to_csv(output_dir + f"/train_basin/Wout/BcProx_W_out{file_tag}.csv", index=False, header=False)
 
     ### ONLY FOR TRAINING BASINS ###
     df_results_train_cal = pd.DataFrame(results_train_cal)
-    df_results_train_cal.to_csv(output_dir + f'/train_basin/results/BC_PUB_results{file_tag}_cal.csv', index=False)
+    df_results_train_cal.to_csv(output_dir + f'/train_basin/results/BcProx_results{file_tag}_cal.csv', index=False)
     df_results_train_eva = pd.DataFrame(results_train_eva)
-    df_results_train_eva.to_csv(output_dir + f'/train_basin/results/BC_PUB_results{file_tag}_eva.csv', index=False)
+    df_results_train_eva.to_csv(output_dir + f'/train_basin/results/BcProx_results{file_tag}_eva.csv', index=False)
 
     ### FOR TEST BASINS ###
     df_results_test_eva = pd.DataFrame(results_test_eva)
-    df_results_test_eva.to_csv(output_dir + f'/test_basin/results/BC_PUB_results{file_tag}_eva.csv', index=False)
+    df_results_test_eva.to_csv(output_dir + f'/test_basin/results/BcProx_results{file_tag}_eva.csv', index=False)
 
-    print(f"BC_PUB{file_tag} is done!")
+    print(f"BcProx{file_tag} is done!")
 print("DONE!!!")

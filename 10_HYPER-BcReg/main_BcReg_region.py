@@ -2,8 +2,8 @@
 # can be used for both BMA and model-based bias correction
 import matplotlib
 matplotlib.use('Agg')
-from esn_BC_PCA_lasso_PUB import ESN
-from run_BC_PCA_PUB import weight_vector, run_BC_pre_PCA, PCA_lasso, run_BC_post_PCA, BayesianModelAveraging
+from esn_BcReg import ESN
+from run_BcReg import weight_vector, run_BC_pre_PCA, PCA_lasso, run_BC_post_PCA, BayesianModelAveraging
 import os
 import pandas as pd 
 import numpy as np

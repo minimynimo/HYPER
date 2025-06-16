@@ -58,15 +58,15 @@ def run_BC(model, file_list, bma_df_cal_og, bma_df_eva_og, varssim_dir, start_da
         W_out_rows.append(W_out_row)
 
         #if train_file_num == train_basins[0]:
-        #    W_out_df.to_csv(output_dir + f"/train_basin/Wout/BC_PUB_W_out.csv", mode='w', index=False, header=False)
+        #    W_out_df.to_csv(output_dir + f"/train_basin/Wout/BcProx_W_out.csv", mode='w', index=False, header=False)
         #else:
-        #    W_out_df.to_csv(output_dir + f"/train_basin/Wout/BC_PUB_W_out.csv", mode='a', index=False, header=False)
+        #    W_out_df.to_csv(output_dir + f"/train_basin/Wout/BcProx_W_out.csv", mode='a', index=False, header=False)
 
         # W_out (1,R)
         # reservoir (R, )
 
         #W_out_df = pd.DataFrame(W_out)
-        #W_out_df.to_csv(f"/data0/funato/0_out/99_out/{loc}/BC_PUB/W_out_file_{train_file_num}.csv", index=False)
+        #W_out_df.to_csv(f"/data0/funato/0_out/99_out/{loc}/BcProx/W_out_file_{train_file_num}.csv", index=False)
         error_train_cal = model.predict(reservoir, input_train_cal, ptb_func=None, ptb_scale=1.0, nexttime=nexttime, extended_interval=10)
         error_train_eva = model.predict(reservoir, input_train_eva, ptb_func=None, ptb_scale=1.0, nexttime=nexttime, extended_interval=10)
 
@@ -89,12 +89,12 @@ def run_BC(model, file_list, bma_df_cal_og, bma_df_eva_og, varssim_dir, start_da
             train_predict_cal_df = pd.DataFrame([train_date_row_cal])
             train_predict_eva_df = pd.DataFrame([train_date_row_eva])
 
-            train_predict_cal_df.to_csv(output_dir + f"/train_basin/predict/BC_PUB_predict_cal.csv", mode='w', index=False, header=False)
-            train_predict_eva_df.to_csv(output_dir + f"/train_basin/predict/BC_PUB_predict_eva.csv", mode='w', index=False, header=False)
+            train_predict_cal_df.to_csv(output_dir + f"/train_basin/predict/BcProx_predict_cal.csv", mode='w', index=False, header=False)
+            train_predict_eva_df.to_csv(output_dir + f"/train_basin/predict/BcProx_predict_eva.csv", mode='w', index=False, header=False)
 
-        with open(output_dir + f"/train_basin/predict/BC_PUB_predict_cal.csv", 'a') as file:
+        with open(output_dir + f"/train_basin/predict/BcProx_predict_cal.csv", 'a') as file:
             pd.DataFrame([train_file_row_cal]).to_csv(file, header=False, index=False)
-        with open(output_dir + f"/train_basin/predict/BC_PUB_predict_eva.csv", 'a') as file:
+        with open(output_dir + f"/train_basin/predict/BcProx_predict_eva.csv", 'a') as file:
             pd.DataFrame([train_file_row_eva]).to_csv(file, header=False, index=False)
 
         file_results_train_cal = {'file_num': file_num}
@@ -102,10 +102,10 @@ def run_BC(model, file_list, bma_df_cal_og, bma_df_eva_og, varssim_dir, start_da
 
         for benchmark in benchmark_list:
             file_results_train_cal.update({
-                f'BC_PUB_{benchmark}_cal': BMK(target_train_cal, train_predict_cal, benchmark)
+                f'BcProx_{benchmark}_cal': BMK(target_train_cal, train_predict_cal, benchmark)
             })
             file_results_train_eva.update({
-                f'BC_PUB_{benchmark}_eva': BMK(target_train_eva, train_predict_eva, benchmark)
+                f'BcProx_{benchmark}_eva': BMK(target_train_eva, train_predict_eva, benchmark)
             })
 
         results_cal.append(file_results_train_cal)
@@ -151,24 +151,9 @@ def BMK(obs_data,sim_data,benchmark):
         sim_std = np.std(sim_data)
         return 1 - np.sqrt((r - 1)**2 + ((sim_std / obs_std) - 1)**2 + ((sim_ave / obs_ave) - 1)**2)
     
-    elif benchmark == "logNSE":
-        temp_obs_data = np.where((obs_data <= 0) | np.isnan(obs_data), 1e-6, obs_data)
-        temp_sim_data = np.where((sim_data <= 0) | np.isnan(sim_data), 1e-6, sim_data)
-        obs_ave = np.mean(temp_obs_data)
-        numer = np.sum((np.log(temp_sim_data) - np.log(temp_obs_data))**2)
-        denom = np.sum((np.log(temp_obs_data) - np.log(obs_ave))**2)
-        return 1 - numer / denom
-    
     elif benchmark == "E1":
         obs_ave = np.mean(obs_data)
         return 1 - (np.sum(np.abs(obs_data - sim_data)) / np.sum(np.abs(obs_data - obs_ave)))
-    
-    elif benchmark == "Erel":
-        obs_ave = np.mean(obs_data)
-        temp_obs_data = np.where(obs_data == 0, 1e-6, obs_data)
-        numer = np.sum(np.square((temp_obs_data - sim_data) / temp_obs_data))
-        denom = np.sum(np.square((obs_data - obs_ave) / obs_ave))
-        return 1 - numer / denom
     
     elif benchmark == "VE":
         return 1 - np.sum(np.abs(obs_data - sim_data)) / np.sum(obs_data)

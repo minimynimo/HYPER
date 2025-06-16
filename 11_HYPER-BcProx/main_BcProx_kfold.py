@@ -1,7 +1,7 @@
 # Description: Main script for running the ESN model on multiple files.
 import matplotlib
 matplotlib.use('Agg')
-from esn_BC_PUB import ESN
+from esn_BcProx import ESN
 import pandas as pd
 import numpy as np
 from numpy.ma import masked_array
@@ -9,7 +9,7 @@ from datetime import datetime
 import os
 import random
 import sys
-from run_BC_PUB import run_BC, BMK, load_data, BayesianModelAveraging
+from run_BcProx import run_BC, BMK, load_data, BayesianModelAveraging
 from sklearn.model_selection import KFold
 
 #####################
@@ -74,15 +74,15 @@ model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m1
               "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39", 
               "m42", "m43", "m44", "m46"]
 
-output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BC_PUB_kfold_{reservoir_size}_{ridge_param}_testtime'
+output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BcProx_kfold_{reservoir_size}_{ridge_param}_testtime'
 os.makedirs(output_base_dir, exist_ok=True)
 
 output_dir = f'{output_base_dir}'
 os.makedirs(output_dir, exist_ok=True)
 
-if os.path.exists(output_base_dir + f'/BC_PUB_random_log.txt'):
-    open(output_base_dir + f'/BC_PUB_random_log.txt', 'w').close()
-log_file = open(output_base_dir + f'/BC_PUB_random_log.txt', 'a')
+if os.path.exists(output_base_dir + f'/BcProx_random_log.txt'):
+    open(output_base_dir + f'/BcProx_random_log.txt', 'w').close()
+log_file = open(output_base_dir + f'/BcProx_random_log.txt', 'a')
 
 start_time = datetime.now()
 start_time_st = start_time.strftime("%a %b %d %I:%M:%S %p JST %Y")
@@ -248,16 +248,16 @@ for fold, (train_index, test_index) in enumerate(kf.split(PosTrainBasin)):
                 test_date_row_eva = list(['Date'] + [str(date.date()) for date in predict_test_eva_dates])
                 test_predict_eva_df = pd.DataFrame([test_date_row_eva])
 
-                test_predict_eva_df.to_csv(output_dir + f"/test_basin/predict/BC_PUB_predict{file_tag}_eva.csv", mode='w', index=False, header=False)
+                test_predict_eva_df.to_csv(output_dir + f"/test_basin/predict/BcProx_predict{file_tag}_eva.csv", mode='w', index=False, header=False)
 
-            with open(output_dir + f"/test_basin/predict/BC_PUB_predict{file_tag}_eva.csv", 'a') as file:
+            with open(output_dir + f"/test_basin/predict/BcProx_predict{file_tag}_eva.csv", 'a') as file:
                 pd.DataFrame([test_file_row_eva]).to_csv(file, header=False, index=False)
 
             file_results_test_eva = {'file_num': predict_file_num}
             target_test_eva = np.concatenate((df_test_eva['Obs flow'].values[1:],)) #1089
             for benchmark in benchmark_list:
                 file_results_test_eva.update({
-                    f'BC_PUB{file_tag}_{benchmark}_eva': BMK(target_test_eva, predict_test_eva, benchmark)
+                    f'BcProx{file_tag}_{benchmark}_eva': BMK(target_test_eva, predict_test_eva, benchmark)
                 })  
 
             results_test_eva.append(file_results_test_eva)
@@ -270,15 +270,15 @@ for fold, (train_index, test_index) in enumerate(kf.split(PosTrainBasin)):
 
 ### ONLY FOR TRAINING BASINS ###
 #df_results_train_cal = pd.DataFrame(results_train_cal)
-#df_results_train_cal.to_csv(output_dir + f'/train_basin/results/BC_PUB_results{file_tag}_cal.csv', index=False)
+#df_results_train_cal.to_csv(output_dir + f'/train_basin/results/BcProx_results{file_tag}_cal.csv', index=False)
 #df_results_train_eva = pd.DataFrame(results_train_eva)
-#df_results_train_eva.to_csv(output_dir + f'/train_basin/results/BC_PUB_results{file_tag}_eva.csv', index=False)
+#df_results_train_eva.to_csv(output_dir + f'/train_basin/results/BcProx_results{file_tag}_eva.csv', index=False)
 
 ### FOR TEST BASINS ###
 df_results_test_eva = pd.DataFrame(results_test_eva)
-df_results_test_eva.to_csv(output_dir + f'/test_basin/results/BC_PUB_results{file_tag}_eva.csv', index=False)
+df_results_test_eva.to_csv(output_dir + f'/test_basin/results/BcProx_results{file_tag}_eva.csv', index=False)
 
-print(f"BC_PUB{file_tag} is done!")
+print(f"BcProx{file_tag} is done!")
 
 end_time = datetime.now()
 end_time_st = end_time.strftime("%a %b %d %I:%M:%S %p JST %Y")

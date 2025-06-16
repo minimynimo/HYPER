@@ -19,6 +19,7 @@ reservoir_size = 700
 spectral_radius = 0.4
 washout = 0
 ridge_param = 0.001
+nexttime=1
 
 #loc, ver = "JP", 1
 loc, ver = "JP", 2
@@ -201,7 +202,7 @@ for file_num in file_list:
     # obs_eva: EVALUATE THE TEST OBSERVED, SHIFTED ONE TIMESTEP OF TRAIN DATA TO PREDICT,EX: OBSERVED FLOW
 
 
-    Wout, reservoir = model.train(input_cal, target_data=error_target_cal, washout=washout, ridge_param=ridge_param, spinup = spin)
+    Wout, reservoir = model.train(input_cal, target_data=error_target_cal, washout=washout, ridge_param=ridge_param)
 
 
     reservoir_row = np.concatenate(([f'file_{file_num}'], reservoir.flatten()))
