@@ -1,106 +1,93 @@
-import matplotlib
-matplotlib.use('Agg')
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
 import numpy as np
-import warnings
-warnings.filterwarnings('ignore')
+import os
 
-#########
-str_stp_tag = False
+fig_size = (6, 6)
+fig_size_cdf = (6, 6)
+fs = 17 
+fs_cdf = 13 
 
-loc, ver = "JP", 2
-nocal_tag = ''
-n_components = 3
-reservoir_size = 200
-#########
-file_tag = f'r{reservoir_size}_s1_sr0.4_rr0.001'
+BcProx_path_val = "hyper/out/JP/BcProx_kfold_200_0.001/test_basin/results/BcProx_results_r200_sr0.4_rr0.001_eva.csv"
+BcReg_path_val = "hyper/out/JP/BcReg_kfold_200_0.001/test_basin/results/BcReg_results_rev_PC2_eva.csv"
+LSTM_path_val = "hyper/out/JP/LSTM_PUB_kfold/results/LSTM_PUB_results_eva.csv"
 
-ver_name = "ver1_1" if ver == 1 else "ver2_0"
+# Load data
+BcProx_data = pd.read_csv(BcProx_path_val)
+BcReg_data = pd.read_csv(BcReg_path_val)
+LSTM_data = pd.read_csv(LSTM_path_val)
 
-if loc == "JP" and ver == 1:
-    file_tot_num = 135
-elif loc == "JP" and ver == 2:
-    file_tot_num = 87
+benchmark_list = ["KGE", "NSE", "E1", "VE", "d", "RMSE", "MAE"]
+os.makedirs('hyper/fig/JP/benchmark/kfold/box', exist_ok=True)
+os.makedirs('hyper/fig/JP/benchmark/kfold/cdf', exist_ok=True)
 
-fs = 20 # 6 for paper
-
-def load_BcProx_data():
-    BcProx_data = f'hyper/out/{loc}/BcProx_kfold_{reservoir_size}/test_basin/results/BcProx_results_r{reservoir_size}_s1_sr0.4_rr0.001_eva.csv'
-    BcProx_df = pd.read_csv(BcProx_data)
-    BcProx_column_data = np.array(BcProx_df[f'BcProx_r{reservoir_size}_s1_sr0.4_rr0.001_{benchmark}_eva'].tolist())
-    return BcProx_column_data
-
-def load_BmaProx_data():
-    BmaProx_data = f'hyper/out/{loc}/BmaProx_kfold/test_basin/results/BmaProx_results_eva.csv'
-    BmaProx_df = pd.read_csv(BmaProx_data)
-    BmaProx_column_data = np.array(BmaProx_df[f'BmaProx_{benchmark}_eva'].tolist())
-    return BmaProx_column_data
-    
-def load_BcReg_data(pc):
-    BcReg_result_data_dir = pd.read_csv(f'hyper/out/{loc}/BcReg_kfold_{reservoir_size}/test_basin/results/BcReg_results_rev_PC{pc}_eva.csv')
-    BcReg_column_data = BcReg_result_data_dir[f'BcReg_r{reservoir_size}_s1_sr0.4_rr0.001_{benchmark}_eva']
-    return BcReg_column_data
-
-def plot_cdf(ax, data, label):
-    sorted_data = np.sort(data)
-    cdf = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
-    ax.plot(sorted_data, cdf, label=label)
-
-output_dir = f'hyper/fig/{loc}/benchmark/Spatial_PUB{nocal_tag}_kfold_cdf'
-os.makedirs(output_dir, exist_ok=True)
-
-calc_mode_to_name = {
-    'BmaProx_norm': 'BmaProx',
-    'BcProx_norm': 'BcProx',
-    'BcReg_norm': 'BcReg'
-}
-
-benchmark_limits = {
-    'KGE': {'min': 0, 'max': 1},
-    'NSE': {'min': 0, 'max': 1},
-    'logNSE': {'min': -150, 'max': 1},
-    'E1': {'min': -2, 'max': 1},
-    'VE': {'min': -2, 'max': 1},
-    'd': {'min': -2, 'max': 1},
-    'RMSE': {'min': 0, 'max': 10},
+benchmark_limits= {
+    'KGE': {'min': -1, 'max': 1},
+    'NSE': {'min': -1, 'max': 1},
+    'E1': {'min': -1, 'max': 1},
+    'VE': {'min': -1, 'max': 1},
+    'd': {'min': 0, 'max': 1},
+    'RMSE': {'min': 0, 'max':10},
     'MAE': {'min': 0, 'max': 10}
 }
 
-benchmark_list = ["KGE","NSE","logNSE","E1","VE", "d","RMSE","MAE"]
-
+# Extract relevant columns (assuming the evaluation metric is in a column named 'value')
 for benchmark in benchmark_list:
-    fig, ax = plt.subplots(figsize=(8, 8))
+    BcProx_values = BcProx_data[f'BcProx_r200_sr0.4_rr0.001_{benchmark}_eva']
+    BcReg_values = BcReg_data[f'BcReg_r200_sr0.4_rr0.001_{benchmark}_eva']
+    LSTM_values = LSTM_data[f'LSTM_PUB_{benchmark}_eva']
 
-    for calc_mode, calc_name in calc_mode_to_name.items():
-        if calc_mode == 'BmaProx_norm':
-            data = load_BmaProx_data()
-            plot_cdf(ax, data, 'BMA-PUB')
-        elif calc_mode == 'BcProx_norm':
-            data = load_BcProx_data()
-            plot_cdf(ax, data, 'BC-PUB')
-        elif calc_mode == 'BcReg_norm':
-            for pc in range(1, n_components + 1):
-                data = load_BcReg_data(pc)
-                plot_cdf(ax, data, f'BCPCA-PUB_PC{pc}')
+    # Combine data for box plot
+    data = [BcProx_values, BcReg_values, LSTM_values]
+    labels = ['BcProx', 'BcReg', 'LSTM']
 
-    ax.set_title(f'CDF for {benchmark}', fontsize=fs)
-    ax.set_xlabel(f'{benchmark}', fontsize=fs)
-    ax.set_ylabel('CDF', fontsize=fs)
-    ax.legend()
-    ax.grid(True)
+    # Create box plot
+    plt.figure(figsize=fig_size)
+    box = plt.boxplot(data, labels=labels, patch_artist=True)
 
-    ax.set_xlim(benchmark_limits[benchmark]['min'], benchmark_limits[benchmark]['max'])
-    ax.set_ylim(0, 1)
-    ax.xaxis.set_tick_params(labelsize=fs)
-    ax.yaxis.set_tick_params(labelsize=fs)
+    # Set colors for each box
+    colors = ['#b39ddb', '#e57373', '#7cc7bc']
+    for patch, color in zip(box['boxes'], colors):
+        patch.set_facecolor(color)
 
-    output_path = os.path.join(output_dir, f'{benchmark}_cdf_eva.jpg')
-    fig.savefig(output_path)
-    plt.close(fig)
+    # Set median line color to black
+    for median in box['medians']:
+        median.set_color('black')
 
-    print(f'{benchmark} CDF DONE!')
+    plt.ylabel(f'{benchmark}', fontsize=fs)
+    plt.grid(axis='y')
+    plt.yticks(fontsize=fs)
+    plt.xticks(fontsize=fs)
+    plt.ylim(benchmark_limits[benchmark]['min'], benchmark_limits[benchmark]['max'])
 
-print(f'saved to {output_dir}')
-print("DONE!")
+
+    plt.tight_layout()
+
+    # Save or show the plot
+    plt.savefig(f'hyper/fig/JP/benchmark/kfold/box/kfold_results_{benchmark}.png')
+
+    plt.close()
+
+    # Create CDF plot
+    colors_cdf = ['#7b3294', '#d7191c', '#2ca02c']  # green, purple, red
+    plt.figure(figsize=fig_size_cdf)
+    for values, label, color in zip(data, labels, colors_cdf):
+        sorted_values = np.sort(values)
+        yvals = np.arange(1, len(sorted_values) + 1) / len(sorted_values)
+        plt.plot(sorted_values, yvals, label=label, color=color, linewidth=1.5)
+    plt.xlabel(f'{benchmark}', fontsize=fs_cdf)
+    plt.ylabel('CDF', fontsize=fs_cdf)
+    plt.grid()
+    plt.legend(fontsize=fs_cdf)
+    plt.xticks(fontsize=fs_cdf)
+    plt.yticks(fontsize=fs_cdf)
+    plt.xlim(benchmark_limits[benchmark]['min'], benchmark_limits[benchmark]['max'])
+    plt.ylim(0, 1)
+    plt.tight_layout()
+    plt.savefig(f'hyper/fig/JP/benchmark/kfold/cdf/kfold_results_{benchmark}_cdf.png')
+    plt.close()
+    print(f"Processed {benchmark} successfully.")
+
+
+
+

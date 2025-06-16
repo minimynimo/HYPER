@@ -56,8 +56,6 @@ if loc == "JP" and ver == 2:
     train_basin_int_list = [70,50,30,20,10,3]
     ridge_param = 1.0
 
-
-
 file_tag = f'r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}'
 
 cal_eva = ['test'] #'train', 
@@ -191,10 +189,7 @@ def load_BcProx_data(train_basin_int, benchmark):
     BcProx_sum_data = None
     BcProx_all_samples = []  # Store all samples for percentile calculations
     for sample in range(1, samples + 1):
-        if completely_random:
-            BcProx_data = f'hyper/out/{loc}/BcProx_random_{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/BcProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
-        else:
-            BcProx_data = f'hyper/out/{loc}/BcProx_random_distributed_{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/BcProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
+        BcProx_data = f'hyper/out/{loc}/BcProx_random_{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/BcProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
         BcProx_df = pd.read_csv(BcProx_data, index_col=0)
         BcProx_df = BcProx_df.sort_values(by='file_num')
         BcProx_df = pd.DataFrame(BcProx_df.values)
@@ -232,10 +227,7 @@ def load_BmaProx_data(train_basin_int, benchmark):
     BmaProx_sum_data = None
     BmaProx_all_samples = []  # Store all samples for percentile calculations
     for sample in range(1, samples + 1):
-        if completely_random:
-            BmaProx_data = f'hyper/out/{loc}/BmaProx_random/Train{train_basin_int}/test_basin/results/BmaProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
-        else:
-            BmaProx_data = f'hyper/out/{loc}/BmaProx_random_distributed/Train{train_basin_int}/test_basin/results/BmaProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
+        BmaProx_data = f'hyper/out/{loc}/BmaProx_random/Train{train_basin_int}/test_basin/results/BmaProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
         BmaProx_df = pd.read_csv(BmaProx_data, index_col=0)
         BmaProx_df = BmaProx_df.sort_values(by='file_num')
         BmaProx_df = pd.DataFrame(BmaProx_df.values)
@@ -269,10 +261,7 @@ def load_BcReg_data(pc, train_basin_int, benchmark):
     BcReg_sum_data = None
     BcReg_all_samples = []  
     for sample in range(1, samples + 1):
-        if completely_random:
-            BcReg_data = f'hyper/out/{loc}/BcReg_random_{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/sample{sample}/BcReg_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
-        else:
-            BcReg_data = f'hyper/out/{loc}/BcReg_random_distributed_{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/sample{sample}/BcReg_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
+        BcReg_data = f'hyper/out/{loc}/BcReg_random_{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/sample{sample}/BcReg_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
         BcReg_df = pd.read_csv(BcReg_data, index_col=0)
         BcReg_df = BcReg_df.sort_values(by='file_num')
         BcReg_df = pd.DataFrame(BcReg_df.values)

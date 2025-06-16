@@ -10,23 +10,18 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-#########
-all_mode = True # include all models
-
-#data_type = 'BMA & RC & RCH & BC'
-data_type = 'BMA & RC & BC'
+########
+data_type = 'BMA & RC & RCH & BC'
+#data_type = 'BMA & RC & BC'
 #data_type = 'RCH & BC'
 #data_type = 'RC & RCH & BC'
 
 loc = "JP"
 
-
 LSTM = False
 
 simple_colors = True
 #simple_colors = False
-
-
 
 #RC
 #reservoir_size = 200
@@ -35,12 +30,12 @@ ridge_param = 0.001
 #ridge_param = 1.0
 
 ##LSTM
-num_epochs = 200 # Number of training epochs
-hidden_size = 20 # Number of LSTM cells
-learning_rate = 1e-3 # Learning rate used to update the weights
-window_size = 365 # Length of the meteorological record provided to the network
-batch_size = 512 # Number of samples in each batch
-dropout_rate = 0.1 # Dropout rate of the final fully connected Layer [0.0, 1.0]
+num_epochs = 200
+hidden_size = 20
+learning_rate = 1e-3
+window_size = 365
+batch_size = 512
+dropout_rate = 0.1
 
 fs = 20 
 #########
@@ -146,8 +141,10 @@ def create_box_plot(ax, plot_df_cal, plot_df_eva, benchmark, ce):
         
         # Define the box colors for the special columns
         # Refactor redundant if-else statements to define box_colors
-        if data_type in ['BMA & RC & RCH & BC', 'RCH & BC', 'RC & RCH & BC']:
+        if data_type in ['BMA & RC & RCH & BC', 'RCH & BC', 'RC & RCH & BC', 'BMA & RC & BC', 'AVE & BMA & RC & RCH & BC & RCBC-BMA']:
             box_colors = get_box_colors(special_columns, simple_colors)
+        else:
+            box_colors = ['gainsboro' for _ in special_columns]
 
         # Set color for the special columns
         for patch, color in zip(boxplot['boxes'], box_colors):
@@ -222,11 +219,11 @@ for benchmark in benchmark_list:
             LSTM_file_path = f'hyper/out/{loc}/LSTM/results/LSTM_results_{file_tag_LSTM}_{ce}_test.csv'
         if data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
             RC_file_path = f'hyper/out/{loc}/RC_{reservoir_size}_{ridge_param}/results/RC_results_{file_tag}_{ce}.csv'
-            RCH_file_path = f'hyper/out/{loc}/RCHBMA_{reservoir_size}_{ridge_param}/results/RCHBMA_results_{file_tag}_{ce}.csv'
-            BC_file_path = f'hyper/out/{loc}/BC_{reservoir_size}_{ridge_param}/results/BC_results_{file_tag}_bma_{ce}.csv'
+            RCH_file_path = f'hyper/out/{loc}/RCH_{reservoir_size}_{ridge_param}/results/RCH_results_{file_tag}_{ce}.csv'
+            HYPER_file_path = f'hyper/out/{loc}/HYPER_{reservoir_size}_{ridge_param}/results/HYPER_results_{file_tag}_{ce}.csv'
         if data_type == 'RCH & BC':
-            RCH_file_path = f'hyper/out/{loc}/RCHBMA_{reservoir_size}_{ridge_param}/results/RCHBMA_results_{file_tag}_{ce}.csv'
-            BC_file_path = f'hyper/out/{loc}/BC_{reservoir_size}_{ridge_param}/results/BC_results_{file_tag}_bma_{ce}.csv'
+            RCH_file_path = f'hyper/out/{loc}/RCH_{reservoir_size}_{ridge_param}/results/RCH_results_{file_tag}_{ce}.csv'
+            HYPER_file_path = f'hyper/out/{loc}/HYPER_{reservoir_size}_{ridge_param}/results/HYPER_results_{file_tag}_{ce}.csv'
 
         BMA_df = pd.read_csv(BMA_file_path)
         if LSTM:
@@ -234,13 +231,13 @@ for benchmark in benchmark_list:
         if data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
             RC_df = pd.read_csv(RC_file_path)
             RCH_df = pd.read_csv(RCH_file_path)
-            BC_df = pd.read_csv(BC_file_path)
+            HYPER_df = pd.read_csv(HYPER_file_path)
 
         BMA_column = f'BMA_{benchmark}_{ce}'
         LSTM_column = f'LSTM_{file_tag_LSTM}_{benchmark}_{ce}'
         RC_column = f'RC_{file_tag}_{benchmark}_{ce}'
-        RCH_column = f'RCHBMA_{file_tag}_{benchmark}_{ce}'
-        BC_column = f'BC_{file_tag}_bma_{benchmark}_{ce}'
+        RCH_column = f'RCH_{file_tag}_{benchmark}_{ce}'
+        HYPER_column = f'HYPER_{file_tag}_{benchmark}_{ce}'
                     
         # Extract data for the current benchmark
         BMA_data = BMA_df[BMA_column]
@@ -249,7 +246,7 @@ for benchmark in benchmark_list:
         if data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
             RC_data = RC_df[RC_column]
             RCH_data = RCH_df[RCH_column]
-            BC_data = BC_df[BC_column]
+            HYPER_data = HYPER_df[HYPER_column]
 
         # Create a DataFrame for the current benchmark
         if ce == 'cal':
@@ -260,16 +257,16 @@ for benchmark in benchmark_list:
                     plot_df_cal['LSTM'] = LSTM_data
                 plot_df_cal['RC'] = RC_data
                 plot_df_cal['RCH'] = RCH_data
-                plot_df_cal['BC'] = BC_data
+                plot_df_cal['BC'] = HYPER_data
             if data_type == 'RCH & BC':
                 plot_df_cal['RCH'] = RCH_data
-                plot_df_cal['BC'] = BC_data
+                plot_df_cal['BC'] = HYPER_data
                 if LSTM:
                     plot_df_cal['LSTM'] = LSTM_data
             if data_type == 'RC & RCH & BC':
                 plot_df_cal['RC'] = RC_data
                 plot_df_cal['RCH'] = RCH_data
-                plot_df_cal['BC'] = BC_data
+                plot_df_cal['BC'] = HYPER_data
 
             for model_name in model_list:
                 MARRMoT_file_path = f'hyper/out/{loc}/MARRMoT_nocal/{model_name}_results_{ce}.csv'
@@ -286,16 +283,16 @@ for benchmark in benchmark_list:
                 if LSTM:
                     plot_df_eva['LSTM'] = LSTM_data
                 plot_df_eva['RCH'] = RCH_data
-                plot_df_eva['BC'] = BC_data
+                plot_df_eva['BC'] = HYPER_data
             if data_type == 'RCH & BC':
                 plot_df_eva['RCH'] = RCH_data
-                plot_df_eva['BC'] = BC_data
+                plot_df_eva['BC'] = HYPER_data
                 if LSTM:
                     plot_df_eva['LSTM'] = LSTM_data
             if data_type == 'RC & RCH & BC':
                 plot_df_eva['RC'] = RC_data
                 plot_df_eva['RCH'] = RCH_data
-                plot_df_eva['BC'] = BC_data
+                plot_df_eva['BC'] = HYPER_data
 
             for model_name in model_list:
                 MARRMoT_file_path = f'hyper/out/{loc}/MARRMoT_nocal/{model_name}_results_{ce}.csv'
