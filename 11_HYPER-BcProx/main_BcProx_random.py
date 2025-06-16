@@ -98,10 +98,7 @@ model = ESN(input_size=input_size,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 
-if non_arid_files:
-    output_base_dir = f'hyper/out/{loc}/BcProx_random_non_distributed_{reservoir_size}_{ridge_param}_non_arid'
-else:
-    output_base_dir = f'hyper/out/{loc}/BcProx_random_non_distributed_{reservoir_size}_{ridge_param}'
+output_base_dir = f'hyper/out/{loc}/BcProx_random_{reservoir_size}_{ridge_param}'
 os.makedirs(output_base_dir, exist_ok=True)
 if os.path.exists(output_base_dir + f'/BcProx_random_log.txt'):
     open(output_base_dir + f'/BcProx_random_log.txt', 'w').close()

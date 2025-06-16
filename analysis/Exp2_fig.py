@@ -40,7 +40,7 @@ def load_BmaProx_data():
     
 def load_BcReg_data(pc):
     BcReg_result_data_dir = pd.read_csv(f'hyper/out/{loc}/BcReg_kfold_{reservoir_size}/test_basin/results/BcReg_results_rev_PC{pc}_eva.csv')
-    BcReg_column_data = BcReg_result_data_dir[f'BC-PCA-lasso_r{reservoir_size}_s1_sr0.4_rr0.001_{benchmark}_eva']
+    BcReg_column_data = BcReg_result_data_dir[f'BcReg_r{reservoir_size}_s1_sr0.4_rr0.001_{benchmark}_eva']
     return BcReg_column_data
 
 def plot_cdf(ax, data, label):
@@ -48,7 +48,7 @@ def plot_cdf(ax, data, label):
     cdf = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
     ax.plot(sorted_data, cdf, label=label)
 
-output_dir = f'/data0/funato/0_out/0_fig/{loc}/benchmark/Spatial_PUB{nocal_tag}_kfold_cdf'
+output_dir = f'hyper/fig/{loc}/benchmark/Spatial_PUB{nocal_tag}_kfold_cdf'
 os.makedirs(output_dir, exist_ok=True)
 
 calc_mode_to_name = {

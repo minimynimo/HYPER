@@ -74,30 +74,6 @@ def run_BC_pre_PCA(model, file_list, loc, output_dir, bma_cal_og, bma_eva_og, st
         predict_cal_og[predict_cal_og < 0] = 0
         predict_eva_og[predict_eva_og < 0] = 0
 
-        #print(predict_cal_og)
-        #print(predict_eva_og)
-        #print(BMK(target_cal_og.T, predict_cal_og, "KGE"), BMK(target_eva_og.T, predict_eva_og, "KGE"))
-        """
-        file_row_cal = [f'file_{file_num}_cal'] + list(predict_cal_og.flatten())
-        file_row_eva = [f'file_{file_num}_eva'] + list(predict_eva_og.flatten())
-
-        if file_num == file_list[0]:
-            predict_cal_dates = pd.date_range(start=pd.to_datetime(start_date_cal) + pd.DateOffset(days=1), periods=len(predict_cal_og[0]))
-            predict_eva_dates = pd.date_range(start=pd.to_datetime(start_date_eva) + pd.DateOffset(days=1), periods=len(predict_eva_og[0]))
-
-            date_row_cal = list(['Date'] + [str(date.date()) for date in predict_cal_dates])
-            date_row_eva = list(['Date'] + [str(date.date()) for date in predict_eva_dates])
-
-            predict_cal_df = pd.DataFrame([date_row_cal])
-            predict_eva_df = pd.DataFrame([date_row_eva])
-
-            predict_cal_df.to_csv(output_dir + f"/train_basin/predict/BC-PCA-lasso_predict{file_tag}_cal.csv", mode='w', index=False, header=False)
-            predict_eva_df.to_csv(output_dir + f"/train_basin/predict/BC-PCA-lasso_predict{file_tag}_eva.csv", mode='w', index=False, header=False)
-
-        with open(output_dir + f"/train_basin/predict/BC-PCA-lasso_predict{file_tag}_cal.csv", 'a') as file:
-            pd.DataFrame([file_row_cal]).to_csv(file, header=False, index=False)
-        with open(output_dir + f"/train_basin/predict/BC-PCA-lasso_predict{file_tag}_eva.csv", 'a') as file:
-            pd.DataFrame([file_row_eva]).to_csv(file, header=False, index=False)"""
 
         file_result_cal_og = {'file_num': file_num}
         file_result_eva_og = {'file_num': file_num}
@@ -291,15 +267,15 @@ def run_BC_post_PCA(model, file_list, loc, output_dir, train_test, PC_n, weights
             date_row_eva = list(['Date'] + [str(date.date()) for date in predict_eva_dates])
             predict_eva_df = pd.DataFrame([date_row_eva])
             if sample:
-                predict_eva_df.to_csv(output_dir + f"/{train_test}_basin/predict/sample{sample}/BC-PCA-lasso_predict{file_tag}_rev_PC{PC_n}_eva.csv", mode='w', index=False, header=False)
+                predict_eva_df.to_csv(output_dir + f"/{train_test}_basin/predict/sample{sample}/BcReg_predict{file_tag}_rev_PC{PC_n}_eva.csv", mode='w', index=False, header=False)
             else:
-                predict_eva_df.to_csv(output_dir + f"/{train_test}_basin/predict/BC-PCA-lasso_predict{file_tag}_rev_PC{PC_n}_eva.csv", mode='w', index=False, header=False)
+                predict_eva_df.to_csv(output_dir + f"/{train_test}_basin/predict/BcReg_predict{file_tag}_rev_PC{PC_n}_eva.csv", mode='w', index=False, header=False)
 
         if sample:
-            with open(output_dir + f"/{train_test}_basin/predict/sample{sample}/BC-PCA-lasso_predict{file_tag}_rev_PC{PC_n}_eva.csv", 'a') as file:
+            with open(output_dir + f"/{train_test}_basin/predict/sample{sample}/BcReg_predict{file_tag}_rev_PC{PC_n}_eva.csv", 'a') as file:
                 pd.DataFrame([file_row_eva]).to_csv(file, header=False, index=False)
         else:
-            with open(output_dir + f"/{train_test}_basin/predict/BC-PCA-lasso_predict{file_tag}_rev_PC{PC_n}_eva.csv", 'a') as file:
+            with open(output_dir + f"/{train_test}_basin/predict/BcReg_predict{file_tag}_rev_PC{PC_n}_eva.csv", 'a') as file:
                 pd.DataFrame([file_row_eva]).to_csv(file, header=False, index=False)
 
         file_results_eva_rev = {'file_num': file_num}
@@ -308,7 +284,7 @@ def run_BC_post_PCA(model, file_list, loc, output_dir, train_test, PC_n, weights
         # Loop over each benchmark and add results to the current file's dictionary
         for benchmark in benchmark_list:
             file_results_eva_rev.update({
-                f'BC-PCA-lasso{file_tag}_{benchmark}_eva': BMK(target_eva_rev, predict_eva_rev, benchmark)
+                f'BcReg{file_tag}_{benchmark}_eva': BMK(target_eva_rev, predict_eva_rev, benchmark)
             })  
 
         # Append the completed dictionary to the results list

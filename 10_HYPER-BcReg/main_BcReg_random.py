@@ -34,7 +34,6 @@ benchmark_list = ["KGE","NSE","E1","VE", "d","RMSE","MAE"]
 ###
 
 nexttime = True
-non_arid_files = True
 
 buf = ""
 
@@ -111,14 +110,11 @@ model = ESN(input_size=input_size,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 
-if non_arid_files:
-    output_base_dir = f'hyper/out/{loc}/BcReg_random_non_distributed_{reservoir_size}_{ridge_param}_non_arid'
-else:
-    output_base_dir = f'hyper/out/{loc}/BcReg_random_non_distributed_{reservoir_size}_{ridge_param}'
+output_base_dir = f'hyper/out/{loc}/BcReg_random_{reservoir_size}_{ridge_param}'
 os.makedirs(output_base_dir, exist_ok=True)
-if os.path.exists(f'{output_base_dir}/BcReg_random_non_distributed{file_tag}_log.txt'):
-    open(f'{output_base_dir}/BcReg_random_non_distributed{file_tag}_log.txt', 'w').close()
-log_file = open(f'{output_base_dir}/BcReg_random_non_distributed{file_tag}_log.txt', 'a')
+if os.path.exists(f'{output_base_dir}/BcReg_random{file_tag}_log.txt'):
+    open(f'{output_base_dir}/BcReg_random{file_tag}_log.txt', 'w').close()
+log_file = open(f'{output_base_dir}/BcReg_random{file_tag}_log.txt', 'a')
 
 param_file_path = os.path.join(output_base_dir, 'parameters.txt')
 with open(param_file_path, 'w') as param_file:
@@ -194,7 +190,7 @@ for train_basin_int in train_basin_int_list:
         log_file.write(f"start: {start_time_st}\n")
         log_file.flush()
 
-        output_fig_dir = f'/data0/funato/0_out/0_fig/{loc}/BcReg_random_non_distributed_{reservoir_size}_{ridge_param}/Train{train_basin_int}/sample{sample}'
+        output_fig_dir = f'hyper/fig/{loc}/BcReg_random_{reservoir_size}_{ridge_param}/Train{train_basin_int}/sample{sample}'
         os.makedirs(output_fig_dir, exist_ok=True)
         #for subdir in [f'train_basin/results/sample{sample}', f'train_basin/predict/sample{sample}', f'train_basin/reservoir/sample{sample}']:
         #    os.makedirs(os.path.join(output_dir, subdir), exist_ok=True)
@@ -214,16 +210,16 @@ for train_basin_int in train_basin_int_list:
         #result_eva_og = result_eva_og[[f'file_{train_basin}_eva' for train_basin in train_basins]]
 
         #df_results_cal_og = pd.DataFrame(result_cal_og)
-        #df_results_cal_og.to_csv(output_dir + f'/train_basin/results/sample{sample}/BC-PCA-lasso_results{file_tag}_cal.csv', index=False)
+        #df_results_cal_og.to_csv(output_dir + f'/train_basin/results/sample{sample}/BcReg_results{file_tag}_cal.csv', index=False)
 
         #df_results_eva_og = pd.DataFrame(result_eva_og)
-        #df_results_eva_og.to_csv(output_dir + f'/train_basin/results/sample{sample}/BC-PCA-lasso_results{file_tag}_eva.csv', index=False)
+        #df_results_eva_og.to_csv(output_dir + f'/train_basin/results/sample{sample}/BcReg_results{file_tag}_eva.csv', index=False)
 
         W_out_og_df = pd.DataFrame(W_out_og_rows)
         W_out_og_df = W_out_og_df[W_out_og_df[0].isin([f'file_{train_basin}' for train_basin in train_basins])]
 
         W_out_og_df.set_index(0, inplace=True)
-        W_out_og_df.to_csv(output_dir + f'/W_out/BC-PCA-lasso_W_out{file_tag}_bma.csv', header=False)
+        W_out_og_df.to_csv(output_dir + f'/W_out/BcReg_W_out{file_tag}_bma.csv', header=False)
 
         print(f"BC TRAINING DONE")
         #log_file.write(f"BC TRAINING DONE\n")
@@ -263,7 +259,7 @@ for train_basin_int in train_basin_int_list:
         predicted_pcs_test_df.index = [f'file_{file_num}' for file_num in test_basins_list]
         predicted_pcs_test_df.to_csv(output_dir_PCA + f'/predicted_pcs_test/PCA_lasso_predicted_pcs_sample{sample}_test.csv') # (file num, PCs)
 
-        ### BC-PCA-lasso ###
+        ### BcReg ###
         for PC_n in range(1, n_components + 1): #1~5
             #log_file.write(f"PC{PC_n}\n")
             #log_file.flush()

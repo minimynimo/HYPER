@@ -1,10 +1,7 @@
 # Creates box, line, and point plots for the Spatial vs Regression PUB benchmark
 # The norm for all plots of PUB can be shown for the training and testing data
 # The difference between the following can be shown for the training and testing data:
-### RCBC-BMA and BMA
-### BC and BMA
-### RCBC-BMA and BC
-### BC and PCA 
+### BcReg and BcProx 
 
 import matplotlib
 matplotlib.use('Agg')
@@ -20,25 +17,16 @@ warnings.filterwarnings('ignore')
 #########
 train_int_tag = False
 
-non_arid_files = True
 BmaProx_cdf = False
 BC_Prox_cdf = False
 LSTM_cdf = False
 gauged_BC = True
-completely_random = False ## if True will use random_non_distributed that makes completely random selection
-                            ## If False will use random_distributed that makes mostly uniformly distributed random selection
 
 #loc, ver = "JP", 1
-#loc, ver = "JP", 2
-loc, ver = "US", 2
-#loc, ver = "AUS", 2
-#loc, ver = "GB", 2
-if loc != "US":
-    non_arid_files = False
+loc, ver = "JP", 2
 
 nocal_tag = ''
 n_components = 3
-spin = 1
 spectral_radius = 0.4
 
 samples_ = 100
@@ -67,50 +55,10 @@ if loc == "JP" and ver == 2:
     train_basin_int_list = [70, 50,30,20,15,10,5,3]
     train_basin_int_list = [70,50,30,20,10,3]
     ridge_param = 1.0
-elif loc == "US" and ver == 2:
-    file_tot_num = 667
-    reservoir_size = 200
-
-    if non_arid_files:
-        arid_file_list = "/data0/funato/3_gis_data/US/0_data/river_basin/dataset_US/arid_file_num.csv"
-        arid_file_list = pd.read_csv(arid_file_list)
-        arid_file_list = arid_file_list['File_num'].tolist()
-        arid_file_list.sort()
-        non_arid_file_list = [i for i in range(1,file_tot_num+1) if i not in arid_file_list]
-        test_basins_list = list(range(4,file_tot_num,10)) #67 values, going 4,14,24,34,,,
-        test_basins_list = [basin for basin in test_basins_list if basin in non_arid_file_list]
-    else:
-        test_basins_list = list(range(4,file_tot_num,10)) #67 values, going 4,14,24,34,,,
-    if non_arid_files:
-        train_basin_int_list = [200,150,100,75,50,25,10] #
-    else:
-        train_basin_int_list = [300,200,150,100,50,25,10,5,3]
-    ridge_param = 1.0
-elif loc == "AUS" and ver == 2:
-    file_tot_num = 84
-    reservoir_size = 200
-
-    test_basins_list = [2,7,12,17,22,27,32,37,42,47,52,57,62,67,72,77,82] # 17 basins
-    train_basin_int_list = [30,20,15,10,5,3,2]
-    ridge_param = 1.0
-elif loc == "GB" and ver == 2:
-    file_tot_num = 396
-    reservoir_size = 300
-
-    test_basins_list = list(range(4, file_tot_num, 10))
-    train_basin_int_list = [170,130,90,60,40,20,10]
-    ridge_param = 1.0
-else:
-    print("Invalid loc and ver")
-    exit()
 
 
-file_tag = f'r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}'
 
-if non_arid_files:
-    non_arid_buf = '_non_arid'
-else:
-    non_arid_buf = ''
+file_tag = f'r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}'
 
 cal_eva = ['test'] #'train', 
 
@@ -244,9 +192,9 @@ def load_BcProx_data(train_basin_int, benchmark):
     BcProx_all_samples = []  # Store all samples for percentile calculations
     for sample in range(1, samples + 1):
         if completely_random:
-            BcProx_data = f'hyper/out/{loc}/BcProx_random_non_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}/Train{train_basin_int}/test_basin/results/BcProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
+            BcProx_data = f'hyper/out/{loc}/BcProx_random_{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/BcProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
         else:
-            BcProx_data = f'hyper/out/{loc}/BcProx_random_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}/Train{train_basin_int}/test_basin/results/BcProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
+            BcProx_data = f'hyper/out/{loc}/BcProx_random_distributed_{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/BcProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
         BcProx_df = pd.read_csv(BcProx_data, index_col=0)
         BcProx_df = BcProx_df.sort_values(by='file_num')
         BcProx_df = pd.DataFrame(BcProx_df.values)
@@ -285,9 +233,9 @@ def load_BmaProx_data(train_basin_int, benchmark):
     BmaProx_all_samples = []  # Store all samples for percentile calculations
     for sample in range(1, samples + 1):
         if completely_random:
-            BmaProx_data = f'hyper/out/{loc}/BmaProx_random_non_distributed{non_arid_buf}/Train{train_basin_int}/test_basin/results/BmaProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
+            BmaProx_data = f'hyper/out/{loc}/BmaProx_random/Train{train_basin_int}/test_basin/results/BmaProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
         else:
-            BmaProx_data = f'hyper/out/{loc}/BmaProx_random_distributed{non_arid_buf}/Train{train_basin_int}/test_basin/results/BmaProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
+            BmaProx_data = f'hyper/out/{loc}/BmaProx_random_distributed/Train{train_basin_int}/test_basin/results/BmaProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
         BmaProx_df = pd.read_csv(BmaProx_data, index_col=0)
         BmaProx_df = BmaProx_df.sort_values(by='file_num')
         BmaProx_df = pd.DataFrame(BmaProx_df.values)
@@ -322,9 +270,9 @@ def load_BcReg_data(pc, train_basin_int, benchmark):
     BcReg_all_samples = []  
     for sample in range(1, samples + 1):
         if completely_random:
-            BcReg_data = f'hyper/out/{loc}/BcReg_random_non_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}/Train{train_basin_int}/test_basin/results/sample{sample}/BcReg_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
+            BcReg_data = f'hyper/out/{loc}/BcReg_random_{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/sample{sample}/BcReg_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
         else:
-            BcReg_data = f'hyper/out/{loc}/BcReg_random_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}/Train{train_basin_int}/test_basin/results/sample{sample}/BcReg_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
+            BcReg_data = f'hyper/out/{loc}/BcReg_random_distributed_{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/sample{sample}/BcReg_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
         BcReg_df = pd.read_csv(BcReg_data, index_col=0)
         BcReg_df = BcReg_df.sort_values(by='file_num')
         BcReg_df = pd.DataFrame(BcReg_df.values)
@@ -411,10 +359,8 @@ def safe_subtract(arr1, arr2):
     min_len = min(len(arr1), len(arr2))
     return arr1[:min_len] - arr2[:min_len]
 
-if completely_random:
-    output_dir = f'/data0/funato/0_out/0_fig/{loc}/benchmark/Spatial_PUB_random_non_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}{nocal_tag}/'
-else:
-    output_dir = f'/data0/funato/0_out/0_fig/{loc}/benchmark/Spatial_PUB_random_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}{nocal_tag}/'
+output_dir = f'hyper/fig/{loc}/benchmark/Spatial_PUB_random_{reservoir_size}_{ridge_param}{nocal_tag}/'
+
 os.makedirs(output_dir, exist_ok=True)
 if BmaProx_cdf:
     output_dir_sub = os.path.join(output_dir, 'cdf_BmaProx')
@@ -438,6 +384,16 @@ calc_mode_to_name = {
     'LSTM_norm': 'LSTM'
 }
 
+benchmark_limits_cdf = {
+    'KGE': {'min': -0.2, 'max': 1},
+    'NSE': {'min': -1, 'max': 1},
+    'logNSE': {'min': -150, 'max': 1},
+    'E1': {'min': -1, 'max': 1},
+    'VE': {'min': -2, 'max': 1},
+    'd': {'min': 0, 'max': 1},
+    'RMSE': {'min': 0, 'max': 10},
+    'MAE': {'min': 0, 'max': 10}
+}
 
 benchmark_limits_cdf_summary = {
     'KGE': {'min': -1.5, 'max': 1},

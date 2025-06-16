@@ -97,8 +97,8 @@ model = ESN(input_size=input_size,
 
 
 for region in region_list:
-    output_dir = f'hyper/out/{loc}/BcReg_{reservoir_size}_{ridge_param}/{non_arid_dir}region/{region}'
-    output_fig_dir = f'/data0/funato/0_out/0_fig/{loc}/BcReg_{reservoir_size}_{ridge_param}/{non_arid_dir}region/{region}'
+    output_dir = f'hyper/out/{loc}/BcReg_{reservoir_size}_{ridge_param}/region/{region}'
+    output_fig_dir = f'hyper/fig/{loc}/BcReg_{reservoir_size}_{ridge_param}/region/{region}'
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(output_dir + '/W_out', exist_ok=True)
     os.makedirs(output_dir + '/PCA', exist_ok=True)
@@ -160,13 +160,13 @@ for region in region_list:
 
     W_out_og_df = pd.DataFrame(W_out_og_rows)
     W_out_og_df.set_index(0, inplace=True)
-    W_out_og_df.to_csv(output_dir + f'/W_out/BC-PCA-lasso_W_out{file_tag}_bma.csv', header=False)
+    W_out_og_df.to_csv(output_dir + f'/W_out/BcReg_W_out{file_tag}_bma.csv', header=False)
 
     df_results_cal_og = pd.DataFrame(result_cal_og)
-    df_results_cal_og.to_csv(output_dir + f'/train_basin/results/BC-PCA-lasso_results{file_tag}_cal.csv', index=False)
+    df_results_cal_og.to_csv(output_dir + f'/train_basin/results/BcReg_results{file_tag}_cal.csv', index=False)
 
     df_results_eva_og = pd.DataFrame(result_eva_og)
-    df_results_eva_og.to_csv(output_dir + f'/train_basin/results/BC-PCA-lasso_results{file_tag}_eva.csv', index=False)
+    df_results_eva_og.to_csv(output_dir + f'/train_basin/results/BcReg_results{file_tag}_eva.csv', index=False)
 
     print(f"BC TRAINING DONE")
     log_file.write(f"BC TRAINING DONE\n")
@@ -202,9 +202,9 @@ for region in region_list:
     predicted_pcs_test_df.index = [f'file_{file_num}' for file_num in file_list_test]
     predicted_pcs_test_df.to_csv(output_dir + f'/PCA/PCA_lasso_predicted_pcs_test.csv') # (file num, PCs)
 
-    ### BC-PCA-lasso ###
+    ### BcReg ###
     for PC_n in range(1, n_components + 1): #1~5
-        log_file.write(f"BC-PCA-lasso{file_tag} {PC_n}\n")
+        log_file.write(f"BcReg{file_tag} {PC_n}\n")
         log_file.flush()
         print(f"PC_n {PC_n}")
 

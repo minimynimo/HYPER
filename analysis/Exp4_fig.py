@@ -133,7 +133,7 @@ def load_BcReg_region_data(pc, region, benchmark, train_test):
     BcReg_region_data = pd.read_csv(f'hyper/out/{loc}/BcReg_{reservoir_size}_{ridge_param}/region/{region}/{train_test}_basin/results/BcReg_results_r{reservoir_size}_s1_sr0.4_rr{ridge_param}_rev_PC{pc}_eva.csv')
     BcReg_region_data = BcReg_region_data.sort_values(by='file_num')
     BcReg_region_data = BcReg_region_data[BcReg_region_data['file_num'].isin(test_basins_list)]
-    BcReg_region_data = BcReg_region_data[f'BC-PCA-lasso_r{reservoir_size}_s1_sr0.4_rr{ridge_param}_{benchmark}_eva']
+    BcReg_region_data = BcReg_region_data[f'BcReg_r{reservoir_size}_s1_sr0.4_rr{ridge_param}_{benchmark}_eva']
     return BcReg_region_data
 
 def load_LSTM_PUB_region_data(region, benchmark, train_test):
@@ -144,9 +144,9 @@ def load_LSTM_PUB_region_data(region, benchmark, train_test):
     return LSTM_PUB_region_data
 
 for pc_n in range(1, n_components+1):
-    output_dir = f'/data0/funato/0_out/0_fig/{loc}/benchmark/Spatial_PUB_distributed_regional_{reservoir_size}_{ridge_param}/box/PC{pc_n}'
+    output_dir = f'hyper/fig/{loc}/benchmark/Spatial_PUB_distributed_regional_{reservoir_size}_{ridge_param}/box/PC{pc_n}'
     if LSTM_data:
-        output_dir = f'/data0/funato/0_out/0_fig/{loc}/benchmark/Spatial_PUB_distributed_regional_{reservoir_size}_{ridge_param}/box_LSTM/PC{pc_n}'
+        output_dir = f'hyper/fig/{loc}/benchmark/Spatial_PUB_distributed_regional_{reservoir_size}_{ridge_param}/box_LSTM/PC{pc_n}'
     os.makedirs(output_dir, exist_ok=True)
     for benchmark in benchmark_list:
         plot_df_train = pd.DataFrame()

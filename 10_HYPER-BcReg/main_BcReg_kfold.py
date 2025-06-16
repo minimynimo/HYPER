@@ -158,7 +158,7 @@ else:
 
 
 
-output_fig_dir = f'/data0/funato/0_out/0_fig/{loc}/BcReg_kfold_{reservoir_size}_{ridge_param}'
+output_fig_dir = f'hyper/fig/{loc}/BcReg_kfold_{reservoir_size}_{ridge_param}'
 os.makedirs(output_fig_dir, exist_ok=True)
 #for subdir in [f'train_basin/results/sample{sample}', f'train_basin/predict/sample{sample}', f'train_basin/reservoir/sample{sample}']:
 #    os.makedirs(os.path.join(output_dir, subdir), exist_ok=True)
@@ -190,7 +190,7 @@ for fold, (train_index, test_index) in enumerate(kf.split(PosTrainBasin)):
     W_out_og_df = W_out_og_df[W_out_og_df[0].isin([f'file_{train_basin}' for train_basin in train_basins])]
 
     #W_out_og_df.set_index(0, inplace=True)
-    #W_out_og_df.to_csv(output_dir + f'/W_out/BC-PCA-lasso_W_out_bma.csv', header=False)
+    #W_out_og_df.to_csv(output_dir + f'/W_out/BcReg_W_out_bma.csv', header=False)
 
     print(f"BC TRAINING DONE")
     #log_file.write(f"BC TRAINING DONE\n")
@@ -231,7 +231,7 @@ for fold, (train_index, test_index) in enumerate(kf.split(PosTrainBasin)):
     predicted_pcs_test_df.index = [f'file_{file_num}' for file_num in test_basins_list]
     predicted_pcs_test_df.to_csv(output_dir_PCA + f'/predicted_pcs_test/PCA_lasso_predicted_pcs_kfold{fold}_test.csv') # (file num, PCs)
 
-    ### BC-PCA-lasso ###
+    ### BcReg ###
     for PC_n in range(1, n_components + 1): #1~5
         first_test_basin = True
         #log_file.write(f"PC{PC_n}\n")

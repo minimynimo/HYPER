@@ -80,7 +80,7 @@ model = ESN(input_size=input_size,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 
-output_base_dir = f'hyper/out/{loc}/BcProx_{reservoir_size}_{ridge_param}{non_arid_buf}'
+output_base_dir = f'hyper/out/{loc}/BcProx_{reservoir_size}_{ridge_param}'
 os.makedirs(output_base_dir, exist_ok=True)
 param_file_path = os.path.join(output_base_dir, 'parameters.txt')
 with open(param_file_path, 'w') as param_file:

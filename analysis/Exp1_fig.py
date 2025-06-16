@@ -52,9 +52,9 @@ file_tag = f'r{reservoir_size}_s1_sr0.4_rr{ridge_param}'
 file_tag_LSTM = f'h{hidden_size}_lr{learning_rate}_e{num_epochs}_w{window_size}_b{batch_size}_d{dropout_rate}'
 
 if LSTM:
-    output_dir = f'/data0/funato/0_out/0_fig/{loc}/benchmark/{data_type}_wLSTM_{reservoir_size}_{ridge_param}'
+    output_dir = f'hyper/fig/{loc}/benchmark/{data_type}_wLSTM_{reservoir_size}_{ridge_param}'
 else:
-    output_dir = f'/data0/funato/0_out/0_fig/{loc}/benchmark/{data_type}_{reservoir_size}_{ridge_param}'
+    output_dir = f'hyper/fig/{loc}/benchmark/{data_type}_{reservoir_size}_{ridge_param}'
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(os.path.join(output_dir, 'box'), exist_ok=True)
 os.makedirs(os.path.join(output_dir, 'point'), exist_ok=True)

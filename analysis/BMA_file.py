@@ -42,8 +42,6 @@ os.makedirs(output_dir + '/results', exist_ok=True)
 os.makedirs(output_dir + '/predict', exist_ok=True)
 os.makedirs(output_dir + '/weights', exist_ok=True)
 
-#model_list = ["m34"]
-#buf = "m34"
 buf = ""
 
 # Helper function to format file names
