@@ -65,7 +65,7 @@ model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m1
               "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39", 
               "m42", "m43", "m44", "m46"]
 
-output_base_dir = f'hyper/out/{loc}/BcProx_kfold_{reservoir_size}_{ridge_param}_testtime'
+output_base_dir = f'hyper/out/{loc}/BcProx_kfold_{reservoir_size}_{ridge_param}'
 os.makedirs(output_base_dir, exist_ok=True)
 
 output_dir = f'{output_base_dir}'
@@ -185,17 +185,6 @@ for fold, (train_index, test_index) in enumerate(kf.split(PosTrainBasin)):
         W_out_weights = W_out_weights.iloc[:, 1:].values.flatten().astype(float).tolist()
         W_out_weights = np.array(W_out_weights).reshape(1, -1)
 
-        end_train_time = datetime.now() 
-        end_train_time_st = end_train_time.strftime("%a %b %d %I:%M:%S %p JST %Y")
-        log_file.write(f"end train: {end_train_time_st}\n")
-        log_file.write(f"elapsed train: {end_train_time - start_time}\n")
-        log_file.flush()
-
-
-        start_test_time = datetime.now()
-        start_test_time_st = start_test_time.strftime("%a %b %d %I:%M:%S %p JST %Y")
-        log_file.write(f"start test{len(test_basin)}: {start_test_time_st}\n")
-        log_file.flush()
         
         ### TEST BASINS ###
         for predict_file_num in test_basins:
@@ -253,10 +242,10 @@ for fold, (train_index, test_index) in enumerate(kf.split(PosTrainBasin)):
 
             results_test_eva.append(file_results_test_eva)
 
-            end_test_time = datetime.now()
-            end_test_time_st = end_test_time.strftime("%a %b %d %I:%M:%S %p JST %Y")
-            log_file.write(f"end test: {end_test_time_st}\n")
-            log_file.write(f"elapsed test: {end_test_time - start_test_time}\n")
+            end_time = datetime.now()
+            end_time_st = end_time.strftime("%a %b %d %I:%M:%S %p JST %Y")
+            log_file.write(f"end test: {end_time_st}\n")
+            log_file.write(f"elapsed test: {end_time - start_time}\n")
             log_file.flush()
 
 ### ONLY FOR TRAINING BASINS ###

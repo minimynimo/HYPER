@@ -36,6 +36,7 @@ loc, ver = "JP", 2
 input_size = 3
 output_size = 1
 #reservoir_size = 700
+reservoir_size = 200
 spectral_radius = 0.4
 washout = 0
 ridge_param = 1.0
@@ -51,7 +52,6 @@ if loc == "JP" and ver == 1:
     columns_drop = ['File_num','grdc_no','river','station','lat_org','long_org']
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
-    reservoir_size = 200
 
     test_basins_list = [4,8,11,18,24,28,32,40,45,50,54,59,65,70,77,82,84] # chosen sequentially based on the file_num when sorted the river basins by latitude 4,14,24,,,
     attribute_values = pd.read_csv(f'{attribute_dir}/basin_data_limited_met&soil&geology&land_{ver_name}.csv', encoding= 'UTF-8') # File_num: 1~135

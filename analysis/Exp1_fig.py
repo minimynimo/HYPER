@@ -13,19 +13,15 @@ warnings.filterwarnings('ignore')
 #########
 all_mode = True # include all models
 
-#data_type = 'AVE & BMA & RC & RCH & BC'
 #data_type = 'BMA & RC & RCH & BC'
 data_type = 'BMA & RC & BC'
 #data_type = 'RCH & BC'
 #data_type = 'RC & RCH & BC'
-#data_type = 'AVE & BMA & RC & RCH & BC & RCBC-BMA'
 
 loc = "JP"
 
-#nocal_tag = "_nocal"
-nocal_tag = ""
 
-LSTM = True
+LSTM = False
 
 simple_colors = True
 #simple_colors = False
@@ -46,9 +42,9 @@ window_size = 365 # Length of the meteorological record provided to the network
 batch_size = 512 # Number of samples in each batch
 dropout_rate = 0.1 # Dropout rate of the final fully connected Layer [0.0, 1.0]
 
-fs = 20 ## 22 or over for presentation, 13 for paper
+fs = 20 
 #########
-file_tag = f'r{reservoir_size}_s1_sr0.4_rr{ridge_param}'
+file_tag = f'r{reservoir_size}_sr0.4_rr{ridge_param}'
 file_tag_LSTM = f'h{hidden_size}_lr{learning_rate}_e{num_epochs}_w{window_size}_b{batch_size}_d{dropout_rate}'
 
 if LSTM:
@@ -96,7 +92,7 @@ def create_box_plot(ax, plot_df_cal, plot_df_eva, benchmark, ce):
         ce_name = ce_names[i]
         
         # Define the special columns and filter out any that are missing from plot_df
-        special_columns_sub = ['AVE', 'BMA', 'RC', 'RCH', 'BC', 'RCBC-BMA']
+        special_columns_sub = ['BMA', 'RC', 'RCH', 'BC']
         if LSTM:
             special_columns_sub.append('LSTM')
         
@@ -105,13 +101,10 @@ def create_box_plot(ax, plot_df_cal, plot_df_eva, benchmark, ce):
 
         # Refactor redundant if-else statements for data_type and special_columns
         special_columns_map = {
-            'AVE_BMA': ['AVE', 'BMA'],
-            'AVE & BMA & RC & RCH & BC': ['AVE', 'BMA', 'RC', 'RCH', 'BC'],
             'BMA & RC & RCH & BC': ['BMA', 'RC', 'RCH', 'BC'],
             'BMA & RC & BC': ['BMA', 'RC', 'BC'],
             'RCH & BC': ['RCH', 'BC'],
             'RC & RCH & BC': ['RC', 'RCH', 'BC'],
-            'AVE & BMA & RC & RCH & BC & RCBC-BMA': ['AVE', 'BMA', 'RC', 'RCH', 'BC', 'RCBC-BMA']
         }
 
         special_columns = special_columns_map.get(data_type, [])
@@ -153,7 +146,7 @@ def create_box_plot(ax, plot_df_cal, plot_df_eva, benchmark, ce):
         
         # Define the box colors for the special columns
         # Refactor redundant if-else statements to define box_colors
-        if data_type in ['AVE_BMA', 'AVE & BMA & RC & RCH & BC', 'BMA & RC & RCH & BC', 'RCH & BC', 'RC & RCH & BC', 'AVE & BMA & RC & RCH & BC & RCBC-BMA']:
+        if data_type in ['BMA & RC & RCH & BC', 'RCH & BC', 'RC & RCH & BC']:
             box_colors = get_box_colors(special_columns, simple_colors)
 
         # Set color for the special columns
@@ -197,12 +190,10 @@ color_dict_simple = {
 }
 
 color_dict_detailed = {
-    'AVE': '#e3dcf7',
     'BMA': '#a6bddb',
     'RC': '#fdae6b',
     'RCH': '#66c2a4',
     'BC': '#fb8072',
-    'RCBC-BMA': '#8da0cb',
     'LSTM': 'pink'
 }
 
@@ -220,68 +211,51 @@ benchmark_list = ["KGE","NSE","E1","VE", "d","RMSE","MAE"]
 for benchmark in benchmark_list:
     for ce in ['cal', 'eva']:
         # Create a figure with 2 subplots: one for cal and one for eva
-        if data_type == 'AVE_BMA':
-            fig_box, axes_box = plt.subplots(nrows=1, ncols=2, figsize=(15, 6))
-            fig_point, axes_point = plt.subplots(nrows=1, ncols=2, figsize=(15, 6))
-
         fig_box, axes_box = plt.subplots(nrows=1, ncols=2, figsize=(15, 6))
         fig_point, axes_point = plt.subplots(nrows=1, ncols=2, figsize=(15, 6))
 
         global_y_min, global_y_max = float('inf'), float('-inf')
 
 
-        AVE_file_path = f'hyper/out/{loc}/AVE{nocal_tag}/results/AVE_results_{ce}.csv'
-        BMA_file_path = f'hyper/out/{loc}/BMA{nocal_tag}/results/BMA_results_{ce}.csv'
+        BMA_file_path = f'hyper/out/{loc}/BMA/results/BMA_results_{ce}.csv'
         if LSTM:
             LSTM_file_path = f'hyper/out/{loc}/LSTM/results/LSTM_results_{file_tag_LSTM}_{ce}_test.csv'
-        if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
+        if data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
             RC_file_path = f'hyper/out/{loc}/RC_{reservoir_size}_{ridge_param}/results/RC_results_{file_tag}_{ce}.csv'
             RCH_file_path = f'hyper/out/{loc}/RCHBMA_{reservoir_size}_{ridge_param}/results/RCHBMA_results_{file_tag}_{ce}.csv'
             BC_file_path = f'hyper/out/{loc}/BC_{reservoir_size}_{ridge_param}/results/BC_results_{file_tag}_bma_{ce}.csv'
         if data_type == 'RCH & BC':
             RCH_file_path = f'hyper/out/{loc}/RCHBMA_{reservoir_size}_{ridge_param}/results/RCHBMA_results_{file_tag}_{ce}.csv'
             BC_file_path = f'hyper/out/{loc}/BC_{reservoir_size}_{ridge_param}/results/BC_results_{file_tag}_bma_{ce}.csv'
-        if data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA':
-            RCBC_BMA_file_path = f'hyper/out/{loc}/RCBC-BMA_{reservoir_size}_{ridge_param}/results/RCBC-BMA_results_{file_tag}_{ce}.csv'
 
-        AVE_df = pd.read_csv(AVE_file_path)
         BMA_df = pd.read_csv(BMA_file_path)
         if LSTM:
             LSTM_df = pd.read_csv(LSTM_file_path) 
-        if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
+        if data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
             RC_df = pd.read_csv(RC_file_path)
             RCH_df = pd.read_csv(RCH_file_path)
             BC_df = pd.read_csv(BC_file_path)
-        if data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA':
-            RCBC_BMA_df = pd.read_csv(RCBC_BMA_file_path)
 
-        AVE_column = f'AVE_{benchmark}_{ce}'
         BMA_column = f'BMA_{benchmark}_{ce}'
         LSTM_column = f'LSTM_{file_tag_LSTM}_{benchmark}_{ce}'
         RC_column = f'RC_{file_tag}_{benchmark}_{ce}'
         RCH_column = f'RCHBMA_{file_tag}_{benchmark}_{ce}'
         BC_column = f'BC_{file_tag}_bma_{benchmark}_{ce}'
-        RCBC_BMA_column = f'RCBC-BMA_{file_tag}_{benchmark}_{ce}'
                     
         # Extract data for the current benchmark
-        AVE_data = AVE_df[AVE_column]
         BMA_data = BMA_df[BMA_column]
         if LSTM:
             LSTM_data = LSTM_df[LSTM_column]
-        if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
+        if data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
             RC_data = RC_df[RC_column]
             RCH_data = RCH_df[RCH_column]
             BC_data = BC_df[BC_column]
-        if data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA':
-            RCBC_BMA_data = RCBC_BMA_df[RCBC_BMA_column]
 
         # Create a DataFrame for the current benchmark
         if ce == 'cal':
             plot_df_cal = pd.DataFrame({})
-            if "AVE" in data_type:
-                plot_df_cal['AVE'] = AVE_data
             plot_df_cal['BMA'] = BMA_data
-            if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RC & RCH & BC'    or data_type == 'BMA & RC & BC':
+            if data_type == 'BMA & RC & RCH & BC' or data_type == 'RC & RCH & BC'or data_type == 'BMA & RC & BC':
                 if LSTM:
                     plot_df_cal['LSTM'] = LSTM_data
                 plot_df_cal['RC'] = RC_data
@@ -296,8 +270,6 @@ for benchmark in benchmark_list:
                 plot_df_cal['RC'] = RC_data
                 plot_df_cal['RCH'] = RCH_data
                 plot_df_cal['BC'] = BC_data
-            if data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA':
-                plot_df_cal['RCBC-BMA'] = RCBC_BMA_data
 
             for model_name in model_list:
                 MARRMoT_file_path = f'hyper/out/{loc}/MARRMoT_nocal/{model_name}_results_{ce}.csv'
@@ -308,10 +280,8 @@ for benchmark in benchmark_list:
                 plot_df_cal[model_name] = MARRMoT_data
         else:
             plot_df_eva = pd.DataFrame({})
-            if "AVE" in data_type:
-                plot_df_eva['AVE'] = AVE_data
             plot_df_eva['BMA'] = BMA_data
-            if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
+            if data_type == 'BMA & RC & RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
                 plot_df_eva['RC'] = RC_data
                 if LSTM:
                     plot_df_eva['LSTM'] = LSTM_data
@@ -326,8 +296,6 @@ for benchmark in benchmark_list:
                 plot_df_eva['RC'] = RC_data
                 plot_df_eva['RCH'] = RCH_data
                 plot_df_eva['BC'] = BC_data
-            if data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA':
-                plot_df_eva['RCBC-BMA'] = RCBC_BMA_data
 
             for model_name in model_list:
                 MARRMoT_file_path = f'hyper/out/{loc}/MARRMoT_nocal/{model_name}_results_{ce}.csv'
@@ -347,24 +315,13 @@ for benchmark in benchmark_list:
     global_y_max = max(global_y_max, y_max)
     
     if benchmark == 'NSE':
-        if data_type == 'AVE_BMA':
-            global_y_min = max(global_y_min, -5)
-        else:
-            global_y_min = max(global_y_min, -1)
+        global_y_min = max(global_y_min, -1)
         global_y_max = 1
     elif benchmark == 'KGE':
-        if data_type == 'AVE_BMA':
-            global_y_min = max(global_y_min, -5)
-        else:
-            global_y_min = max(global_y_min, -1)
-        global_y_max = 1
-    elif benchmark == 'logNSE':
+        global_y_min = max(global_y_min, -1)
         global_y_max = 1
     elif benchmark == 'E1':
-        if data_type == 'AVE_BMA':
-            global_y_min = max(global_y_min, -5)
-        else:
-            global_y_min = max(global_y_min, -1)
+        global_y_min = max(global_y_min, -1)
         global_y_max = 1
     elif benchmark == 'VE':
         global_y_max = 1
@@ -372,35 +329,22 @@ for benchmark in benchmark_list:
         global_y_max = 1
     elif benchmark == 'RMSE' or benchmark == 'MAE':
         global_y_min = 0
-        if data_type == 'AVE_BMA':
-            global_y_max = min(global_y_max, 10)
-        else:
-            global_y_max = min(global_y_max, 6)
+        global_y_max = min(global_y_max, 6)
 
     
     # Set the same y-axis limits for both subplots
     all_axes = [axes_box[0], axes_point[0], axes_box[1], axes_point[1]]
 
     for ax in all_axes:
-        if data_type == 'AVE_BMA':
-            ax.set_ylim(benchmark_limit_avebma[benchmark]['min'], benchmark_limit_avebma[benchmark]['max'])
-        else:
-            ax.set_ylim(benchmark_limits[benchmark]['min'], benchmark_limits[benchmark]['max'])
+        ax.set_ylim(benchmark_limits[benchmark]['min'], benchmark_limits[benchmark]['max'])
 
     fig_box.tight_layout()
     #fig_line.tight_layout()
     fig_point.tight_layout()
 
-
-    if benchmark == 'logNSE':
-        box_output_path = os.path.join(output_dir, f'box/{benchmark}_boxplot{buf}_{ce}.jpg')
-        #line_output_path = os.path.join(output_dir, f'line/{benchmark}_lineplot{buf}_{ce}.jpg')
-        point_output_path = os.path.join(output_dir, f'point/{benchmark}_pointplot{buf}_{ce}.jpg')
-
-    else:
-        box_output_path = os.path.join(output_dir, f'box/{benchmark}_boxplot{buf}_{ce}.jpg')
-        #line_output_path = os.path.join(output_dir, f'line/{benchmark}_lineplot{buf}_{ce}.jpg')
-        point_output_path = os.path.join(output_dir, f'point/{benchmark}_pointplot{buf}_{ce}.jpg')
+    box_output_path = os.path.join(output_dir, f'box/{benchmark}_boxplot{buf}_{ce}.jpg')
+    #line_output_path = os.path.join(output_dir, f'line/{benchmark}_lineplot{buf}_{ce}.jpg')
+    point_output_path = os.path.join(output_dir, f'point/{benchmark}_pointplot{buf}_{ce}.jpg')
 
     fig_box.savefig(box_output_path)
     #fig_line.savefig(line_output_path)

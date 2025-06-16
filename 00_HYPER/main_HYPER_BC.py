@@ -2,7 +2,7 @@
 # can be used for both BMA and model-based bias correction
 import matplotlib
 matplotlib.use('Agg')
-from esn_HYPER import ESN
+from esn_HYPER_BC import ESN
 import os
 import pandas as pd
 import numpy as np
@@ -35,7 +35,7 @@ if loc == "JP" and ver == 1:
     file_tot_num  = 135
     varssim_dir = f"hyper/data/MERVJP/varssim_nocal/ver1_1"
 elif loc == "JP" and ver == 2:
-    file_tot_num = 20#87
+    file_tot_num = 87
     varssim_dir = f"hyper/data/MERVJP/varssim_nocal/ver2_0"
 
 file_list = list(range(1, file_tot_num+1))
