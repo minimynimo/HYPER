@@ -33,8 +33,6 @@ fs = 15
 benchmark_list = ["KGE","NSE","E1","VE", "d","RMSE","MAE"]
 ###
 
-spin = 1
-
 nexttime = True
 non_arid_files = True
 
@@ -85,7 +83,7 @@ elif loc == "JP" and ver == 2:
 
 varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
 
-file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}{buf}"
+file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}{buf}"
 #####################
 print(file_tag)
 
@@ -128,7 +126,6 @@ with open(param_file_path, 'w') as param_file:
     param_file.write(f"reservoir_size = {reservoir_size}\n")
     param_file.write(f"spectral_radius = {spectral_radius}\n")
     param_file.write(f"ridge_param = {ridge_param}\n")
-    param_file.write(f"spin = {spin}\n")
     param_file.write("\n===PCA===\n")
     param_file.write(f"alpha = {alpha}\n")
 
@@ -172,7 +169,6 @@ result_cal_og, result_eva_og, W_out_og_rows = run_BC_pre_PCA(model,
                                                         file_tag, 
                                                         washout, 
                                                         ridge_param, 
-                                                        spin, 
                                                         nexttime, 
                                                         varssim_dir)
 

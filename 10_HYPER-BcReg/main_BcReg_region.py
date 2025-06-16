@@ -24,23 +24,14 @@ alpha = 0.1
 fs = 15
 benchmark_list = ["KGE","NSE","E1","VE", "d","RMSE","MAE"]
 ###
-spin = 1
 
 nexttime = True
 BMA_data_exist = True
 
-non_arid_files = True
-
 buf = ""
 
 #loc, ver = "JP", 1
-#loc, ver = "JP", 2
-#loc, ver = "US", 1
-loc, ver = "US", 2
-#loc, ver = "GB", 2
-
-if loc != "US":
-    non_arid_files = False
+loc, ver = "JP", 2
 
 input_size = 3
 output_size = 1
@@ -48,7 +39,6 @@ output_size = 1
 spectral_radius = 0.4
 washout = 0
 ridge_param = 1.0
-
 #####################
 
 
@@ -70,57 +60,12 @@ elif loc == "JP" and ver == 2:
     region_list = ['Hokkaido', 'Tohoku', 'Kanto', 'Tokai-Kinki', 'Shikoku-Kyusyu']
     region_list = ['Tokai-Kinki', 'Shikoku-Kyusyu']
     region_list_df = pd.read_csv(f'hyper/data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
-elif loc == "US" and ver == 1:
-    file_tot_num = 669
-    reservoir_size = 200
 
-    if non_arid_files:
-        arid_file_list = "/data0/funato/3_gis_data/US/0_data/river_basin/dataset_US/arid_file_num.csv"
-        arid_file_list = pd.read_csv(arid_file_list)
-        arid_file_list = arid_file_list['File_num'].tolist()
-        arid_file_list.sort()
-        non_arid_file_list = [i for i in range(1,file_tot_num+1) if i not in arid_file_list]
-
-    attribute_values = pd.read_csv(f'{attribute_dir}/camels_attribute_combined.csv', encoding= 'UTF-8') # File_num: 1~135
-    columns_drop = ['File_num','gauge_id','gauge_name','country']
-elif loc == "US" and ver == 2:
-    file_tot_num = 667
-    reservoir_size = 200
-
-    if non_arid_files:
-        arid_file_list = "/data0/funato/3_gis_data/US/0_data/river_basin/dataset_US/arid_file_num.csv"
-        arid_file_list = pd.read_csv(arid_file_list)
-        arid_file_list = arid_file_list['File_num'].tolist()
-        arid_file_list.sort()
-        non_arid_file_list = [i for i in range(1,file_tot_num+1) if i not in arid_file_list]
-
-    test_basins_list = list(range(4,file_tot_num,10)) #67 values, going 4,14,24,34,,,
-    attribute_values = pd.read_csv(f'{attribute_dir}/camels_attribute_combined.csv', encoding= 'UTF-8') # File_num: 1~135
-    columns_drop = ['File_num','gauge_id','gauge_name','country']
-    region_list = ['EastCoast_N','EastCoast_C', 'EastCoast_S', 'Inland_N', 'Inland_S', 'WestCoast_N', 'WestCoast_S']
-    region_list = ['WestCoast_S']
-    region_list_df = pd.read_csv(f'/data0/funato/3_gis_data/US/0_data/river_basin/dataset_US/file_num_region.csv')
-elif loc == "GB" and ver == 2:
-    file_tot_num = 396
-    reservoir_size = 300
-
-    test_basins_list = list(range(4, file_tot_num, 10))
-    attribute_values = pd.read_csv(f'{attribute_dir}/camelsgb_attribute_combined.csv', encoding= 'UTF-8')
-    columns_drop = ['File_num','gauge_id','gauge_name','country']
-    region_list = ["Northernmost", "NorthMid", "NorthEdge", "SouthEdge", "SouthMid", "Southernmost"]
-    region_list = ["Southernmost"]
-    region_list_df = pd.read_csv(f'/data0/funato/3_gis_data/GB/0_data/river_basin/dataset_GB/file_num_valid_small.csv')
-    
 varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
-file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}{buf}"
+file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}{buf}"
 print(file_tag)
 
-if non_arid_files:
-    file_list = non_arid_file_list
-    non_arid_dir = "non_arid/"
-else:
-    file_list = list(range(1, file_tot_num+1))
-
+file_list = list(range(1, file_tot_num+1))
 
 start_date_cal = '1993-01-01'
 end_date_cal = '2000-12-31'
@@ -166,7 +111,7 @@ for region in region_list:
     log_file = open(output_dir + f'/BcReg{file_tag}_log.txt', 'a')
     log_file.flush()
 
-    file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}"
+    file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}"
     print(file_tag)
 
     file_list_train = sorted(region_list_df[region_list_df['Region'] == region]['File_num'].tolist())
@@ -209,7 +154,6 @@ for region in region_list:
                                                                 file_tag, 
                                                                 washout, 
                                                                 ridge_param, 
-                                                                spin, 
                                                                 nexttime, 
                                                                 varssim_dir,
                                                                 log_file=log_file)

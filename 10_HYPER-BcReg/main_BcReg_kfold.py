@@ -31,10 +31,8 @@ from sklearn.model_selection import KFold
 n_components = 3
 alpha = 0.1
 fs = 15
-benchmark_list = ["KGE","NSE","logNSE","E1","VE", "d","RMSE","MAE"]
+benchmark_list = ["KGE","NSE","E1","VE", "d","RMSE","MAE"]
 ###
-
-spin = 1
 
 nexttime = True
 
@@ -42,9 +40,6 @@ buf = ""
 
 #loc, ver = "JP", 1
 loc, ver = "JP", 2
-#loc, ver = "US", 1
-#loc, ver = "US", 2
-#loc, ver = "GB", 2
 
 kfold_val = 12
 
@@ -62,7 +57,7 @@ BC_data_exist = False
 random_samples = 100
 random_seed = 42 
 
-file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}{buf}"
+file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}{buf}"
 #####################
 print(file_tag)
 
@@ -141,7 +136,7 @@ bma_eva_og = pd.DataFrame(bma_df_eva_og)
 #bma_weights_og = bma_weights_og[[f'file_{num}' for num in PosTrainBasin]]
 
 if BC_data_exist:
-    W_out_og_rows = pd.read_csv(f'hyper/out/{loc}/BC_{reservoir_size}/Wout/BC_Wout_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}_bma.csv', header=None, index_col=0)
+    W_out_og_rows = pd.read_csv(f'hyper/out/{loc}/BC_{reservoir_size}/Wout/BC_Wout_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}_bma.csv', header=None, index_col=0)
     W_out_og_rows = W_out_og_rows.reset_index().values.tolist()
 else:
     result_cal_og, result_eva_og, W_out_og_rows = run_BC_pre_PCA(model, 
@@ -158,7 +153,6 @@ else:
                                                             file_tag, 
                                                             washout, 
                                                             ridge_param, 
-                                                            spin, 
                                                             nexttime, 
                                                             varssim_dir)
 

@@ -13,7 +13,6 @@ warnings.filterwarnings('ignore')
 #########
 all_mode = True # include all models
 
-#data_type = 'AVE_BMA'
 #data_type = 'AVE & BMA & RC & RCH & BC'
 #data_type = 'BMA & RC & RCH & BC'
 data_type = 'BMA & RC & BC'
@@ -22,15 +21,11 @@ data_type = 'BMA & RC & BC'
 #data_type = 'AVE & BMA & RC & RCH & BC & RCBC-BMA'
 
 loc = "JP"
-#loc = "US"
-#loc = "AUS"
-#loc = "GB"
 
 #nocal_tag = "_nocal"
 nocal_tag = ""
 
 LSTM = True
-M34h = False
 
 simple_colors = True
 #simple_colors = False
@@ -58,10 +53,6 @@ file_tag_LSTM = f'h{hidden_size}_lr{learning_rate}_e{num_epochs}_w{window_size}_
 
 if LSTM:
     output_dir = f'/data0/funato/0_out/0_fig/{loc}/benchmark/{data_type}_wLSTM_{reservoir_size}_{ridge_param}'
-    if M34h:
-        output_dir = f'/data0/funato/0_out/0_fig/{loc}/benchmark/{data_type}_wLSTM_M34h_{reservoir_size}_{ridge_param}'
-elif M34h:
-    output_dir = f'/data0/funato/0_out/0_fig/{loc}/benchmark/{data_type}_wM34h_{reservoir_size}_{ridge_param}'
 else:
     output_dir = f'/data0/funato/0_out/0_fig/{loc}/benchmark/{data_type}_{reservoir_size}_{ridge_param}'
 os.makedirs(output_dir, exist_ok=True)
@@ -106,53 +97,27 @@ def create_box_plot(ax, plot_df_cal, plot_df_eva, benchmark, ce):
         
         # Define the special columns and filter out any that are missing from plot_df
         special_columns_sub = ['AVE', 'BMA', 'RC', 'RCH', 'BC', 'RCBC-BMA']
-        if M34h:
-            special_columns_sub.append('FLEX\n-IS')
         if LSTM:
             special_columns_sub.append('LSTM')
         
         # Default assignment for special_columns
         special_columns = []
 
-        if data_type == 'AVE_BMA':
-            special_columns = ['AVE', 'BMA']    
-        elif data_type == 'AVE & BMA & RC & RCH & BC':
-            special_columns = ['AVE', 'BMA', 'RC', 'RCH', 'BC']
-            if M34h:
-                special_columns.insert(0, 'FLEX\n-IS')  # Insert 'FLEX\n-IS' at the beginning
-            if LSTM:
-                special_columns.append('LSTM')
-        elif data_type == 'BMA & RC & RCH & BC' :
-            special_columns = ['BMA', 'RC', 'RCH', 'BC']
-            if M34h:
-                special_columns.insert(0, 'FLEX\n-IS')  # Insert 'FLEX\n-IS' at the beginning
-            if LSTM:
-                special_columns.append('LSTM')
-        elif data_type == 'BMA & RC & BC':
-            special_columns = ['BMA', 'RC', 'BC']
-            if M34h:
-                special_columns.insert(0, 'FLEX\n-IS')
-            if LSTM:
-                special_columns.append('LSTM')
-        elif data_type == 'RCH & BC':
-            special_columns = ['RCH', 'BC']
-            if M34h:
-                special_columns.insert(0, 'FLEX\n-IS')  # Insert 'FLEX\n-IS' at the beginning
-            if LSTM:
-                special_columns.append('LSTM')
-        elif data_type == 'RC & RCH & BC':
-            special_columns = ['RC', 'RCH', 'BC']
-            if M34h:
-                special_columns.insert(0, 'FLEX\n-IS')  # Insert 'FLEX\n-IS' at the beginning
-            if LSTM:
-                special_columns.append('LSTM')
-        elif data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA':
-            special_columns = ['AVE', 'BMA', 'RC', 'RCH', 'BC', 'RCBC-BMA']
-            if M34h:
-                special_columns.insert(0, 'FLEX\n-IS')  # Insert 'FLEX\n-IS' at the beginning
-            if LSTM:
-                special_columns.append('LSTM')
-        
+        # Refactor redundant if-else statements for data_type and special_columns
+        special_columns_map = {
+            'AVE_BMA': ['AVE', 'BMA'],
+            'AVE & BMA & RC & RCH & BC': ['AVE', 'BMA', 'RC', 'RCH', 'BC'],
+            'BMA & RC & RCH & BC': ['BMA', 'RC', 'RCH', 'BC'],
+            'BMA & RC & BC': ['BMA', 'RC', 'BC'],
+            'RCH & BC': ['RCH', 'BC'],
+            'RC & RCH & BC': ['RC', 'RCH', 'BC'],
+            'AVE & BMA & RC & RCH & BC & RCBC-BMA': ['AVE', 'BMA', 'RC', 'RCH', 'BC', 'RCBC-BMA']
+        }
+
+        special_columns = special_columns_map.get(data_type, [])
+        if LSTM:
+            special_columns.append('LSTM')
+
         # Filter special_columns to include only those present in plot_df
         special_columns = [col for col in special_columns if col in plot_df.columns]
 
@@ -187,21 +152,9 @@ def create_box_plot(ax, plot_df_cal, plot_df_eva, benchmark, ce):
         ax[i].grid(axis = 'y', linewidth = 0.4)
         
         # Define the box colors for the special columns
-        if data_type == 'AVE_BMA':
-            box_colors = ['#a6bddb' if col == 'BMA' else '#e3dcf7' if col == 'AVE' else 'gainsboro' for col in special_columns]
-        if LSTM:
-            if simple_colors:
-                box_colors = ['#f2e8dc' if col == 'BMA' else '#f2e8dc' if col == 'RC' else '#FFC857' if col == 'RCH' else '#F45B69' if col == 'BC' else '#7cc7bc' if col == 'LSTM' else 'gainsboro' for col in special_columns]
-            else:
-                if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC':
-                    box_colors = ['#e3dcf7' if col == 'AVE' else '#a6bddb' if col == 'BMA' else '#fdae6b' if col == 'RC' else '#66c2a4' if col == 'RCH' else '#fb8072' if col == 'BC' else 'pink' if col == 'LSTM' else '#f0ccb6' if col == 'FLEX\n-IS' else 'gainsboro' for col in special_columns]
-                if data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA':
-                    box_colors = ['#e3dcf7' if col == 'AVE' else '#a6bddb' if col == 'BMA' else '#fdae6b' if col == 'RC' else '#66c2a4' if col == 'RCH' else '#fb8072' if col == 'BC' else '#8da0cb' if col == 'RCBC-BMA' else 'pink' if col == 'LSTM' else '#f0ccb6' if col == 'FLEX\n-IS' else 'gainsboro' for col in special_columns]
-        else:
-            if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC':
-                box_colors = ['#e3dcf7' if col == 'AVE' else '#a6bddb' if col == 'BMA' else '#fdae6b' if col == 'RC' else '#66c2a4' if col == 'RCH' else '#fb8072' if col == 'BC' else '#f0ccb6' if col == 'FLEX\n-IS' else 'gainsboro' for col in special_columns]
-            if data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA':
-                box_colors = ['#e3dcf7' if col == 'AVE' else '#a6bddb' if col == 'BMA' else '#fdae6b' if col == 'RC' else '#66c2a4' if col == 'RCH' else '#fb8072' if col == 'BC' else '#8da0cb' if col == 'RCBC-BMA' else '#f0ccb6' if col == 'FLEX\n-IS' else 'gainsboro' for col in special_columns]
+        # Refactor redundant if-else statements to define box_colors
+        if data_type in ['AVE_BMA', 'AVE & BMA & RC & RCH & BC', 'BMA & RC & RCH & BC', 'RCH & BC', 'RC & RCH & BC', 'AVE & BMA & RC & RCH & BC & RCBC-BMA']:
+            box_colors = get_box_colors(special_columns, simple_colors)
 
         # Set color for the special columns
         for patch, color in zip(boxplot['boxes'], box_colors):
@@ -234,6 +187,31 @@ def create_point_plot(ax, plot_df_cal, plot_df_eva, benchmark, ce):
 
         ax[i].yaxis.set_major_formatter(mticker.FormatStrFormatter('%.2f'))
 
+# Define dictionaries for box colors
+color_dict_simple = {
+    'BMA': '#f2e8dc',
+    'RC': '#f2e8dc',
+    'RCH': '#FFC857',
+    'BC': '#F45B69',
+    'LSTM': '#7cc7bc'
+}
+
+color_dict_detailed = {
+    'AVE': '#e3dcf7',
+    'BMA': '#a6bddb',
+    'RC': '#fdae6b',
+    'RCH': '#66c2a4',
+    'BC': '#fb8072',
+    'RCBC-BMA': '#8da0cb',
+    'LSTM': 'pink'
+}
+
+def get_box_colors(columns, simple_colors):
+    if simple_colors:
+        return [color_dict_simple.get(col, 'gainsboro') for col in columns]
+    else:
+        return [color_dict_detailed.get(col, 'gainsboro') for col in columns]
+
 #buf = "_ave-bma-indivmodel"
 buf = ""
 
@@ -256,8 +234,6 @@ for benchmark in benchmark_list:
         BMA_file_path = f'hyper/out/{loc}/BMA{nocal_tag}/results/BMA_results_{ce}.csv'
         if LSTM:
             LSTM_file_path = f'hyper/out/{loc}/LSTM/results/LSTM_results_{file_tag_LSTM}_{ce}_test.csv'
-        if M34h:
-            M34h_file_path = f'hyper/out/{loc}/MARRMoT/m34_results_{ce}.csv'
         if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
             RC_file_path = f'hyper/out/{loc}/RC_{reservoir_size}_{ridge_param}/results/RC_results_{file_tag}_{ce}.csv'
             RCH_file_path = f'hyper/out/{loc}/RCHBMA_{reservoir_size}_{ridge_param}/results/RCHBMA_results_{file_tag}_{ce}.csv'
@@ -272,8 +248,6 @@ for benchmark in benchmark_list:
         BMA_df = pd.read_csv(BMA_file_path)
         if LSTM:
             LSTM_df = pd.read_csv(LSTM_file_path) 
-        if M34h:
-            M34h_df = pd.read_csv(M34h_file_path)
         if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
             RC_df = pd.read_csv(RC_file_path)
             RCH_df = pd.read_csv(RCH_file_path)
@@ -284,7 +258,6 @@ for benchmark in benchmark_list:
         AVE_column = f'AVE_{benchmark}_{ce}'
         BMA_column = f'BMA_{benchmark}_{ce}'
         LSTM_column = f'LSTM_{file_tag_LSTM}_{benchmark}_{ce}'
-        M34h_column = f'm34_{benchmark}_{ce}'
         RC_column = f'RC_{file_tag}_{benchmark}_{ce}'
         RCH_column = f'RCHBMA_{file_tag}_{benchmark}_{ce}'
         BC_column = f'BC_{file_tag}_bma_{benchmark}_{ce}'
@@ -295,8 +268,6 @@ for benchmark in benchmark_list:
         BMA_data = BMA_df[BMA_column]
         if LSTM:
             LSTM_data = LSTM_df[LSTM_column]
-        if M34h:
-            M34h_data = M34h_df[M34h_column]
         if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
             RC_data = RC_df[RC_column]
             RCH_data = RCH_df[RCH_column]
@@ -313,8 +284,6 @@ for benchmark in benchmark_list:
             if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RC & RCH & BC'    or data_type == 'BMA & RC & BC':
                 if LSTM:
                     plot_df_cal['LSTM'] = LSTM_data
-                if M34h:
-                    plot_df_cal['FLEX\n-IS'] = M34h_data
                 plot_df_cal['RC'] = RC_data
                 plot_df_cal['RCH'] = RCH_data
                 plot_df_cal['BC'] = BC_data
@@ -323,8 +292,6 @@ for benchmark in benchmark_list:
                 plot_df_cal['BC'] = BC_data
                 if LSTM:
                     plot_df_cal['LSTM'] = LSTM_data
-                if M34h:
-                    plot_df_cal['FLEX\n-IS'] = M34h_data
             if data_type == 'RC & RCH & BC':
                 plot_df_cal['RC'] = RC_data
                 plot_df_cal['RCH'] = RCH_data
@@ -345,8 +312,6 @@ for benchmark in benchmark_list:
                 plot_df_eva['AVE'] = AVE_data
             plot_df_eva['BMA'] = BMA_data
             if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
-                if M34h:
-                    plot_df_eva['FLEX\n-IS'] = M34h_data
                 plot_df_eva['RC'] = RC_data
                 if LSTM:
                     plot_df_eva['LSTM'] = LSTM_data
@@ -357,8 +322,6 @@ for benchmark in benchmark_list:
                 plot_df_eva['BC'] = BC_data
                 if LSTM:
                     plot_df_eva['LSTM'] = LSTM_data
-                if M34h:
-                    plot_df_eva['FLEX\n-IS'] = M34h_data
             if data_type == 'RC & RCH & BC':
                 plot_df_eva['RC'] = RC_data
                 plot_df_eva['RCH'] = RCH_data

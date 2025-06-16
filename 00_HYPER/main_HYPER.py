@@ -17,9 +17,10 @@ input_size = 3
 output_size = 1
 reservoir_size = 700
 spectral_radius = 0.4
+
 washout = 0
 ridge_param = 0.001
-nexttime=1
+nexttime= True
 
 #loc, ver = "JP", 1
 loc, ver = "JP", 2

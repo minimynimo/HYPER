@@ -14,19 +14,10 @@ benchmark_list = ["KGE","NSE","logNSE","E1","VE", "d","RMSE","MAE"]
 
 #loc, ver = "JP", 1
 loc, ver = "JP", 2
-#loc, ver = "US", 1
-#loc, ver = "US", 2
-#loc, ver = "GB",2
 
-spin = 1
 nexttime = True
 
 BMA_data_exist = True
-
-non_arid_files = True
-non_arid_buf = ""
-if loc != "US":
-    non_arid_files = False
 
 input_size = 3
 output_size = 1
@@ -57,48 +48,14 @@ elif loc == "JP" and ver == 2:
     #region_list = ['Hokkaido']
     region_list_df = pd.read_csv(f'hyper/data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
     distance_matrix = pd.read_csv('/data0/funato/3_gis_data/JP/0_data/distance_matrix_v2_sorted.csv', index_col=0, header=0)
-elif loc == "US" and ver == 1:
-    file_tot_num = 669
-    reservoir_size = 200
-
-    columns_drop = ['File_num','gauge_id','gauge_name','country']
-elif loc == "US" and ver == 2:
-    file_tot_num = 667
-    reservoir_size = 200
-
-    if non_arid_files:
-        arid_file_list = "/data0/funato/3_gis_data/US/0_data/river_basin/dataset_US/arid_file_num.csv"
-        arid_file_list = pd.read_csv(arid_file_list)
-        arid_file_list = arid_file_list['File_num'].tolist()
-        arid_file_list.sort()
-        non_arid_file_list = [i for i in range(1,file_tot_num+1) if i not in arid_file_list]
-
-    test_basins_list = list(range(4,file_tot_num,10)) #67 values, going 4,14,24,34,,,
-    columns_drop = ['File_num','gauge_id','gauge_name','country']
-    region_list = ['EastCoast_N','EastCoast_C', 'EastCoast_S', 'Inland_N', 'Inland_S', 'WestCoast_N', 'WestCoast_S']
-    region_list = ['WestCoast_S']
-    region_list_df = pd.read_csv(f'/data0/funato/3_gis_data/US/0_data/river_basin/dataset_US/file_num_region.csv')
-elif loc == "GB" and ver == 2:
-    file_tot_num = 396
-    reservoir_size = 300
-
-    test_basins_list = list(range(4, file_tot_num, 10))
-    columns_drop = ['File_num','gauge_id','gauge_name','country']
-    region_list = ["Northernmost", "NorthMid", "NorthEdge", "SouthEdge", "SouthMid", "Southernmost"]
-    region_list = ["Southernmost"]
-    region_list_df = pd.read_csv(f'/data0/funato/3_gis_data/GB/0_data/river_basin/dataset_GB/file_num_valid_small.csv')
     
 varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
-file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}"
+file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}"
 print(file_tag)
 
 varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
 
-if non_arid_files:
-    file_list = non_arid_file_list
-    non_arid_buf = "_non_arid"
-else:
-    file_list = list(range(1, file_tot_num+1))
+file_list = list(range(1, file_tot_num+1))
 
 model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m10",
               "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18", "m19", "m20",
@@ -131,7 +88,6 @@ with open(param_file_path, 'w') as param_file:
     param_file.write(f"reservoir_size = {reservoir_size}\n")
     param_file.write(f"spectral_radius = {spectral_radius}\n")
     param_file.write(f"ridge_param = {ridge_param}\n")
-    param_file.write(f"spin = {spin}\n")
 
 
 for region in region_list:
@@ -141,7 +97,7 @@ for region in region_list:
     for subdir in ['train_basin/results', 'train_basin/predict',  'train_basin/Wout' ,'test_basin/results', 'test_basin/predict']:
         os.makedirs(os.path.join(output_dir, subdir), exist_ok=True)
 
-    file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}"
+    file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}"
     print(file_tag)
 
     results_train_cal = []
@@ -240,7 +196,7 @@ for region in region_list:
         # precip_eva:  INPUT OF THE ESN , EX; PRECIPITATION, TEMPERATURE, OTHER INPUTS
         # obs_eva: EVALUATE THE TEST OBSERVED, SHIFTED ONE TIMESTEP OF TRAIN DATA TO PREDICT,EX: OBSERVED FLOW
 
-        W_out, reservoir = model.train(input_train_cal, target_data=error_train_target_cal, washout=washout, ridge_param=ridge_param, spinoff = spin)
+        W_out, reservoir = model.train(input_train_cal, target_data=error_train_target_cal, washout=washout, ridge_param=ridge_param)
 
         W_out_weights = W_out.copy()
         W_out_row = np.concatenate(([f'file_{file_num}'], W_out.flatten()))

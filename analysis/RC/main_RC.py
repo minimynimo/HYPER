@@ -62,8 +62,6 @@ def load_data(file_num):
     
     if loc == "JP":
         df['Date'] = pd.to_datetime(df[['Year', 'Month', 'Day']])
-    else:
-        df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
     
     # Create a date range that covers the entire period

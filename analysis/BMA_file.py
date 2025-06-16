@@ -12,11 +12,7 @@ import pandas as pd
 benchmark_list = ["KGE","NSE","E1","VE", "d","RMSE","MAE"]
 
 #loc, ver = "JP", 1
-#loc, ver = "JP", 2
-#loc, ver = "US", 1
-#loc, ver = "US", 2
-#loc, ver = "AUS", 2
-loc, ver = "GB", 2
+loc, ver = "JP", 2
 ############
 
 ver_name = 'ver1_1' if ver == 1 else 'ver2_0'
@@ -24,14 +20,7 @@ if loc == "JP" and ver == 1:
     file_tot_num  = 135
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
-elif loc == "US" and ver == 1:
-    file_tot_num = 669
-elif loc == "US" and ver == 2:
-    file_tot_num = 667
-elif loc == "AUS" and ver == 2:
-    file_tot_num = 84
-elif loc == "GB" and ver == 2:
-    file_tot_num = 396
+
 varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
 
 
@@ -85,24 +74,9 @@ def BMK(obs_data,sim_data,benchmark):
         obs_ave = np.mean(obs_data)
         return 1 - (np.sum(np.square(obs_data - sim_data)) / np.sum(np.square(obs_data - obs_ave)))
     
-    elif benchmark == "logNSE":
-        temp_obs_data = np.where((obs_data <= 0) | np.isnan(obs_data), 1e-6, obs_data)
-        temp_sim_data = np.where((sim_data <= 0) | np.isnan(sim_data), 1e-6, sim_data)
-        obs_ave = np.mean(temp_obs_data)
-        numer = np.sum((np.log(temp_sim_data) - np.log(temp_obs_data))**2)
-        denom = np.sum((np.log(temp_obs_data) - np.log(obs_ave))**2)
-        return 1 - numer / denom
-    
     elif benchmark == "E1":
         obs_ave = np.mean(obs_data)
         return 1 - (np.sum(np.abs(obs_data - sim_data)) / np.sum(np.abs(obs_data - obs_ave)))
-    
-    elif benchmark == "Erel":
-        obs_ave = np.mean(obs_data)
-        temp_obs_data = np.where(obs_data == 0, 1e-6, obs_data)
-        numer = np.sum(np.square((temp_obs_data - sim_data) / temp_obs_data))
-        denom = np.sum(np.square((obs_data - obs_ave) / obs_ave))
-        return 1 - numer / denom
     
     elif benchmark == "VE":
         return 1 - np.sum(np.abs(obs_data - sim_data)) / np.sum(obs_data)

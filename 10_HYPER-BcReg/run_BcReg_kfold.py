@@ -340,8 +340,6 @@ def load_data(file_num, varssim_dir, loc, start_date, end_date):
     
     if loc == "JP":
         df['Date'] = pd.to_datetime(df[['Year', 'Month', 'Day']])
-    elif loc == "US":
-        df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
     
     # Create a date range that covers the entire period

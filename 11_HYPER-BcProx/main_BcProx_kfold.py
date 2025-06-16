@@ -17,10 +17,7 @@ benchmark_list = ["KGE","NSE","E1","VE", "d","RMSE","MAE"]
 
 #loc, ver = "JP", 1
 loc, ver = "JP", 2
-#loc, ver = "US", 1
-#loc, ver = "US", 2
 
-spin = 1
 nexttime = True
 
 kfold_val = 12
@@ -45,7 +42,7 @@ BC_data_exist = False
 random_samples = 100
 random_seed = 42 
 
-file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}"
+file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}"
 #####################
 ver_name = "ver1_1" if ver == 1 else "ver2_0"
 
@@ -58,12 +55,6 @@ elif loc == "JP" and ver == 2:
     file_tot_num = 87
     basin_data_df = pd.read_csv("hyper/data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
     distance_matrix = pd.read_csv('/data0/funato/3_gis_data/JP/0_data/distance_matrix_v2_sorted.csv', index_col=0, header=0)
-elif loc == "US" and ver == 1:
-    file_tot_num = 671
-elif loc == "US" and ver == 2:
-    file_tot_num = 667
-    basin_data_df = pd.read_csv("/data0/funato/3_gis_data/US/0_data/river_basin/dataset_US/pub_region_list_ver2_0.csv")
-    distance_matrix = pd.read_csv('/data0/funato/3_gis_data/US/0_data/distance_matrix_sorted.csv', index_col=0, header=0)
 
 varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
 PosTrainBasin = list(range(1, file_tot_num+1))
@@ -138,7 +129,7 @@ if BC_data_exist:
     W_out_og_rows = W_out_og_rows.reset_index().values.tolist()
     W_out_weights_og = pd.DataFrame(W_out_og_rows)
 else:
-    result_cal_og, result_eva_og, W_out_weights_og = run_BC(model, PosTrainBasin, bma_df_cal_og, bma_df_eva_og, varssim_dir, start_date_cal, end_date_cal, start_date_eva, end_date_eva, loc, output_base_dir, washout, ridge_param, spin, nexttime, benchmark_list)
+    result_cal_og, result_eva_og, W_out_weights_og = run_BC(model, PosTrainBasin, bma_df_cal_og, bma_df_eva_og, varssim_dir, start_date_cal, end_date_cal, start_date_eva, end_date_eva, loc, output_base_dir, washout, ridge_param, nexttime, benchmark_list)
 
 W_out_weights_og = pd.DataFrame(W_out_weights_og)
 
