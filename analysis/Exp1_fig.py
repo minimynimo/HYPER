@@ -252,21 +252,21 @@ for benchmark in benchmark_list:
         global_y_min, global_y_max = float('inf'), float('-inf')
 
 
-        AVE_file_path = f'/data0/funato/0_out/99_out/{loc}/AVE{nocal_tag}/results/AVE_results_{ce}.csv'
-        BMA_file_path = f'/data0/funato/0_out/99_out/{loc}/BMA{nocal_tag}/results/BMA_results_{ce}.csv'
+        AVE_file_path = f'hyper/out/{loc}/AVE{nocal_tag}/results/AVE_results_{ce}.csv'
+        BMA_file_path = f'hyper/out/{loc}/BMA{nocal_tag}/results/BMA_results_{ce}.csv'
         if LSTM:
-            LSTM_file_path = f'/data0/funato/0_out/99_out/{loc}/LSTM/results/LSTM_results_{file_tag_LSTM}_{ce}_test.csv'
+            LSTM_file_path = f'hyper/out/{loc}/LSTM/results/LSTM_results_{file_tag_LSTM}_{ce}_test.csv'
         if M34h:
-            M34h_file_path = f'/data0/funato/0_out/99_out/{loc}/MARRMoT/m34_results_{ce}.csv'
+            M34h_file_path = f'hyper/out/{loc}/MARRMoT/m34_results_{ce}.csv'
         if data_type == 'AVE & BMA & RC & RCH & BC' or data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA' or data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
-            RC_file_path = f'/data0/funato/0_out/99_out/{loc}/RC_{reservoir_size}_{ridge_param}/results/RC_results_{file_tag}_{ce}.csv'
-            RCH_file_path = f'/data0/funato/0_out/99_out/{loc}/RCHBMA_{reservoir_size}_{ridge_param}/results/RCHBMA_results_{file_tag}_{ce}.csv'
-            BC_file_path = f'/data0/funato/0_out/99_out/{loc}/BC_{reservoir_size}_{ridge_param}/results/BC_results_{file_tag}_bma_{ce}.csv'
+            RC_file_path = f'hyper/out/{loc}/RC_{reservoir_size}_{ridge_param}/results/RC_results_{file_tag}_{ce}.csv'
+            RCH_file_path = f'hyper/out/{loc}/RCHBMA_{reservoir_size}_{ridge_param}/results/RCHBMA_results_{file_tag}_{ce}.csv'
+            BC_file_path = f'hyper/out/{loc}/BC_{reservoir_size}_{ridge_param}/results/BC_results_{file_tag}_bma_{ce}.csv'
         if data_type == 'RCH & BC':
-            RCH_file_path = f'/data0/funato/0_out/99_out/{loc}/RCHBMA_{reservoir_size}_{ridge_param}/results/RCHBMA_results_{file_tag}_{ce}.csv'
-            BC_file_path = f'/data0/funato/0_out/99_out/{loc}/BC_{reservoir_size}_{ridge_param}/results/BC_results_{file_tag}_bma_{ce}.csv'
+            RCH_file_path = f'hyper/out/{loc}/RCHBMA_{reservoir_size}_{ridge_param}/results/RCHBMA_results_{file_tag}_{ce}.csv'
+            BC_file_path = f'hyper/out/{loc}/BC_{reservoir_size}_{ridge_param}/results/BC_results_{file_tag}_bma_{ce}.csv'
         if data_type == 'AVE & BMA & RC & RCH & BC & RCBC-BMA':
-            RCBC_BMA_file_path = f'/data0/funato/0_out/99_out/{loc}/RCBC-BMA_{reservoir_size}_{ridge_param}/results/RCBC-BMA_results_{file_tag}_{ce}.csv'
+            RCBC_BMA_file_path = f'hyper/out/{loc}/RCBC-BMA_{reservoir_size}_{ridge_param}/results/RCBC-BMA_results_{file_tag}_{ce}.csv'
 
         AVE_df = pd.read_csv(AVE_file_path)
         BMA_df = pd.read_csv(BMA_file_path)
@@ -333,7 +333,7 @@ for benchmark in benchmark_list:
                 plot_df_cal['RCBC-BMA'] = RCBC_BMA_data
 
             for model_name in model_list:
-                MARRMoT_file_path = f'/data0/funato/0_out/99_out/{loc}/MARRMoT_nocal/{model_name}_results_{ce}.csv'
+                MARRMoT_file_path = f'hyper/out/{loc}/MARRMoT_nocal/{model_name}_results_{ce}.csv'
                 MARRMoT_df = pd.read_csv(MARRMoT_file_path)
                 MARRMoT_column = f'{model_name}_{benchmark}_{ce}'
                 MARRMoT_data = MARRMoT_df[MARRMoT_column]
@@ -367,7 +367,7 @@ for benchmark in benchmark_list:
                 plot_df_eva['RCBC-BMA'] = RCBC_BMA_data
 
             for model_name in model_list:
-                MARRMoT_file_path = f'/data0/funato/0_out/99_out/{loc}/MARRMoT_nocal/{model_name}_results_{ce}.csv'
+                MARRMoT_file_path = f'hyper/out/{loc}/MARRMoT_nocal/{model_name}_results_{ce}.csv'
                 MARRMoT_df = pd.read_csv(MARRMoT_file_path)
                 MARRMoT_column = f'{model_name}_{benchmark}_{ce}'
                 MARRMoT_data = MARRMoT_df[MARRMoT_column]

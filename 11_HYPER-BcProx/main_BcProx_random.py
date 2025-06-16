@@ -46,7 +46,7 @@ random_seed = 42
 
 #####################
 ver_name = "ver1_1" if ver == 1 else "ver2_0"
-attribute_dir = f'/data0/funato/3_gis_data/{loc}/0_data/river_basin/dataset_{loc}'
+attribute_dir = f'hyper/data/river_basin/dataset_{loc}'
 
 if loc == "JP" and ver == 1:
     file_tot_num  = 135
@@ -61,7 +61,7 @@ elif loc == "JP" and ver == 2:
     test_basins_list = [4,8,11,18,24,28,32,40,45,50,54,59,65,70,77,82,84]
     #train_basin_int_list = [30,20,15,10,5,3,2]
     train_basin_int_list = [70,50,30,20,10,5,3]
-    basin_data_df = pd.read_csv("/data0/funato/3_gis_data/JP/0_data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
+    basin_data_df = pd.read_csv("hyper/data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
     distance_matrix = pd.read_csv('/data0/funato/3_gis_data/JP/0_data/distance_matrix_v2_sorted.csv', index_col=0, header=0)
     columns_drop = ['File_num','grdc_no','river','station','lat_org','long_org']
 elif loc == "US" and ver == 1:
@@ -108,11 +108,11 @@ elif loc == "GB" and ver == 2:
     test_basins_list = list(range(4, file_tot_num, 10))
     train_basin_int_list = [170,130,90,60,40,20,10]
 
-    basin_data_df = pd.read_csv(f"/data0/funato/3_gis_data/{loc}/0_data/river_basin/dataset_{loc}/file_num_valid_small.csv")
-    distance_matrix = pd.read_csv(f'/data0/funato/3_gis_data/{loc}/0_data/distance_matrix_sorted.csv', index_col=0, header=0)
+    basin_data_df = pd.read_csv(f"hyper/data/river_basin/dataset_{loc}/file_num_valid_small.csv")
+    distance_matrix = pd.read_csv(f'hyper/data/distance_matrix_sorted.csv', index_col=0, header=0)
     columns_drop = ['File_num','gauge_id','gauge_name','country']
 
-varssim_dir = f"/data0/funato/2_MERV/{loc}/varssim_nocal/{ver_name}"
+varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
 file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}"
 
 if non_arid_files:
@@ -131,9 +131,9 @@ model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m1
 
 # Load the BMA weights and predictions as dictionaries
 if BMA_data_exist:
-    bma_weights_df = pd.read_csv(f"/data0/funato/0_out/99_out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
-    bma_df_cal_og = pd.read_csv(f"/data0/funato/0_out/99_out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
-    bma_df_eva_og = pd.read_csv(f"/data0/funato/0_out/99_out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
+    bma_weights_df = pd.read_csv(f"hyper/out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
+    bma_df_cal_og = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
+    bma_df_eva_og = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
 
     bma_weights_df = bma_weights_df.to_dict(orient='index')
     bma_df_cal_og = bma_df_cal_og.to_dict(orient='index')
@@ -157,9 +157,9 @@ model = ESN(input_size=input_size,
             input_scale=0.5)
 
 if non_arid_files:
-    output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BcProx_random_non_distributed_{reservoir_size}_{ridge_param}_non_arid'
+    output_base_dir = f'hyper/out/{loc}/BcProx_random_non_distributed_{reservoir_size}_{ridge_param}_non_arid'
 else:
-    output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BcProx_random_non_distributed_{reservoir_size}_{ridge_param}'
+    output_base_dir = f'hyper/out/{loc}/BcProx_random_non_distributed_{reservoir_size}_{ridge_param}'
 os.makedirs(output_base_dir, exist_ok=True)
 if os.path.exists(output_base_dir + f'/BcProx_random_log.txt'):
     open(output_base_dir + f'/BcProx_random_log.txt', 'w').close()

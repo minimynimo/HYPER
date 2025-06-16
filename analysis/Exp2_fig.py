@@ -26,22 +26,22 @@ elif loc == "JP" and ver == 2:
 
 fs = 20 # 6 for paper
 
-def load_BC_PUB_data():
-    BC_PUB_data = f'/data0/funato/0_out/99_out/{loc}/BC_PUB_kfold_{reservoir_size}/test_basin/results/BC_PUB_results_r{reservoir_size}_s1_sr0.4_rr0.001_eva.csv'
-    BC_PUB_df = pd.read_csv(BC_PUB_data)
-    BC_PUB_column_data = np.array(BC_PUB_df[f'BC_PUB_r{reservoir_size}_s1_sr0.4_rr0.001_{benchmark}_eva'].tolist())
-    return BC_PUB_column_data
+def load_BcProx_data():
+    BcProx_data = f'hyper/out/{loc}/BcProx_kfold_{reservoir_size}/test_basin/results/BcProx_results_r{reservoir_size}_s1_sr0.4_rr0.001_eva.csv'
+    BcProx_df = pd.read_csv(BcProx_data)
+    BcProx_column_data = np.array(BcProx_df[f'BcProx_r{reservoir_size}_s1_sr0.4_rr0.001_{benchmark}_eva'].tolist())
+    return BcProx_column_data
 
-def load_BMA_PUB_data():
-    BMA_PUB_data = f'/data0/funato/0_out/99_out/{loc}/BMA_PUB_kfold/test_basin/results/BMA_PUB_results_eva.csv'
-    BMA_PUB_df = pd.read_csv(BMA_PUB_data)
-    BMA_PUB_column_data = np.array(BMA_PUB_df[f'BMA_PUB_{benchmark}_eva'].tolist())
-    return BMA_PUB_column_data
+def load_BmaProx_data():
+    BmaProx_data = f'hyper/out/{loc}/BmaProx_kfold/test_basin/results/BmaProx_results_eva.csv'
+    BmaProx_df = pd.read_csv(BmaProx_data)
+    BmaProx_column_data = np.array(BmaProx_df[f'BmaProx_{benchmark}_eva'].tolist())
+    return BmaProx_column_data
     
-def load_BC_PCA_lasso_PUB_data(pc):
-    BC_PCA_lasso_result_data_dir = pd.read_csv(f'/data0/funato/0_out/99_out/{loc}/BC-PCA-lasso_PUB_kfold_{reservoir_size}/test_basin/results/BC-PCA-lasso_PUB_results_rev_PC{pc}_eva.csv')
-    BC_PCA_lasso_PUB_column_data = BC_PCA_lasso_result_data_dir[f'BC-PCA-lasso_r{reservoir_size}_s1_sr0.4_rr0.001_{benchmark}_eva']
-    return BC_PCA_lasso_PUB_column_data
+def load_BcReg_data(pc):
+    BcReg_result_data_dir = pd.read_csv(f'hyper/out/{loc}/BcReg_kfold_{reservoir_size}/test_basin/results/BcReg_results_rev_PC{pc}_eva.csv')
+    BcReg_column_data = BcReg_result_data_dir[f'BC-PCA-lasso_r{reservoir_size}_s1_sr0.4_rr0.001_{benchmark}_eva']
+    return BcReg_column_data
 
 def plot_cdf(ax, data, label):
     sorted_data = np.sort(data)
@@ -52,9 +52,9 @@ output_dir = f'/data0/funato/0_out/0_fig/{loc}/benchmark/Spatial_PUB{nocal_tag}_
 os.makedirs(output_dir, exist_ok=True)
 
 calc_mode_to_name = {
-    'BMA_norm': 'BMA_PUB',
-    'BC_norm': 'BC_PUB',
-    'PCA_norm': 'BC-PCA-lasso_PUB'
+    'BmaProx_norm': 'BmaProx',
+    'BcProx_norm': 'BcProx',
+    'BcReg_norm': 'BcReg'
 }
 
 benchmark_limits = {
@@ -74,15 +74,15 @@ for benchmark in benchmark_list:
     fig, ax = plt.subplots(figsize=(8, 8))
 
     for calc_mode, calc_name in calc_mode_to_name.items():
-        if calc_mode == 'BMA_norm':
-            data = load_BMA_PUB_data()
+        if calc_mode == 'BmaProx_norm':
+            data = load_BmaProx_data()
             plot_cdf(ax, data, 'BMA-PUB')
-        elif calc_mode == 'BC_norm':
-            data = load_BC_PUB_data()
+        elif calc_mode == 'BcProx_norm':
+            data = load_BcProx_data()
             plot_cdf(ax, data, 'BC-PUB')
-        elif calc_mode == 'PCA_norm':
+        elif calc_mode == 'BcReg_norm':
             for pc in range(1, n_components + 1):
-                data = load_BC_PCA_lasso_PUB_data(pc)
+                data = load_BcReg_data(pc)
                 plot_cdf(ax, data, f'BCPCA-PUB_PC{pc}')
 
     ax.set_title(f'CDF for {benchmark}', fontsize=fs)

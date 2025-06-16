@@ -32,10 +32,10 @@ ver_name = "ver1_1" if ver == 1 else "ver2_0"
 
 if loc == "JP" and ver == 1:
     file_tot_num  = 135
-    varssim_dir = f"/data0/funato/2_MERV/{loc}/varssim_nocal/ver1_1"
+    varssim_dir = f"hyper/data/MERVJP/varssim_nocal/ver1_1"
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
-    varssim_dir = f"/data0/funato/2_MERV/{loc}/varssim_nocal/ver2_0"
+    varssim_dir = f"hyper/data/MERVJP/varssim_nocal/ver2_0"
 
 file_list = list(range(1, file_tot_num+1))
 

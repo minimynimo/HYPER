@@ -42,13 +42,7 @@ buf = ""
 
 #loc, ver = "JP", 1
 loc, ver = "JP", 2
-#loc, ver = "US", 1
-#loc, ver = "US", 2
-#loc, ver = "AUS",2
-#loc, ver = "GB", 2
 
-if loc != "US":
-    non_arid_files = False
 
 input_size = 3
 output_size = 1
@@ -65,7 +59,7 @@ random_seed = 42
 ####################
 
 ver_name = "ver1_1" if ver == 1 else "ver2_0" 
-attribute_dir = f'/data0/funato/3_gis_data/{loc}/0_data/river_basin/dataset_{loc}'
+attribute_dir = f'hyper/data/river_basin/dataset_{loc}'
 
 if loc == "JP" and ver == 1:
     file_tot_num  = 135
@@ -84,69 +78,18 @@ elif loc == "JP" and ver == 2:
     #train_basin_int_list = [70,50,30]
     train_basin_int_list = [20,10,5,3]
 
-    basin_data_df = pd.read_csv("/data0/funato/3_gis_data/JP/0_data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
+    basin_data_df = pd.read_csv("hyper/data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
     attribute_values = pd.read_csv(f'{attribute_dir}/basin_data_JP_cleaned_limited.csv', encoding= 'UTF-8') # File_num: 1~135
     columns_drop = ['File_num','grdc_no','river','station','lat_org','long_org']
-elif loc == "US" and ver == 1:
-    file_tot_num = 671
-    reservoir_size = 200
 
-    attribute_values = pd.read_csv(f'{attribute_dir}/camels_attribute_combined.csv', encoding= 'UTF-8') # File_num: 1~135
-    columns_drop = ['File_num','gauge_id','gauge_name','country']
-elif loc == "US" and ver == 2:
-    file_tot_num = 667
-    reservoir_size = 200
 
-    if non_arid_files:
-        arid_file_list = "/data0/funato/3_gis_data/US/0_data/river_basin/dataset_US/arid_file_num.csv"
-        arid_file_list = pd.read_csv(arid_file_list)
-        arid_file_list = arid_file_list['File_num'].tolist()
-        arid_file_list.sort()
-        non_arid_file_list = [i for i in range(1,file_tot_num+1) if i not in arid_file_list]
-        print(len(non_arid_file_list))
-        test_basins_list = list(range(4,file_tot_num,10)) #67 values, going 4,14,24,34,,,
-        test_basins_list = [basin for basin in test_basins_list if basin in non_arid_file_list]
-        train_basin_int_list = [200,150,100,75,50,25,10]
-        train_basin_int_list = [75]
-    else:
-        test_basins_list = list(range(4,file_tot_num,10)) #67 values, going 4,14,24,34,,,
-        train_basin_int_list = [300,200,150,100,50,25,10,5,3]
-
-    basin_data_df = pd.read_csv("/data0/funato/3_gis_data/US/0_data/river_basin/dataset_US/pub_region_list_ver2_0.csv")
-    attribute_values = pd.read_csv(f'{attribute_dir}/camels_attribute_combined.csv', encoding= 'UTF-8') # File_num: 1~135
-    columns_drop = ['File_num','gauge_id','gauge_name','country']
-elif loc == "AUS" and ver == 2:
-    file_tot_num = 84
-    test_basins_list = [2,7,12,17,22,27,32,37,42,47,52,57,62,67,72,77,82] # 17 basins
-    train_basin_int_list = [30,20,15,10,5,3,2]
-    #train_basin_int_list = [30,20,15] #,10,5,3,2
-    train_basin_int_list = [10,5,3,2]
-
-    basin_data_df = pd.read_csv("/data0/funato/3_gis_data/AUS/0_data/river_basin/dataset_AUS/file_num_valid_small.csv")
-    attribute_values = pd.read_csv(f'{attribute_dir}/camelsaus_attribute_combined.csv', encoding= 'UTF-8') # File_num: 1~135
-    columns_drop = ['File_num','gauge_id','gauge_name','country']
-elif loc == "GB" and ver == 2:
-    file_tot_num = 396
-    reservoir_size = 300
-
-    test_basins_list = list(range(4, file_tot_num, 10))
-    train_basin_int_list = [170,130,90,60,40,20,10]
-    train_basin_int_list = [20,10]
-    #train_basin_int_list = [25,10,5,3]
-    basin_data_df = pd.read_csv(f"/data0/funato/3_gis_data/{loc}/0_data/river_basin/dataset_{loc}/file_num_valid_small.csv")
-    attribute_values = pd.read_csv(f'{attribute_dir}/camelsgb_attribute_combined.csv', encoding= 'UTF-8') # File_num: 1~135
-    columns_drop = ['File_num','gauge_id','gauge_name','country']
-
-varssim_dir = f"/data0/funato/2_MERV/{loc}/varssim_nocal/{ver_name}"
+varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
 
 file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}{buf}"
 #####################
 print(file_tag)
 
-if non_arid_files:
-    file_list = non_arid_file_list
-else:
-    file_list = list(range(1, file_tot_num+1))
+file_list = list(range(1, file_tot_num+1))
 
 # possible training basins to select the training basins from
 PosTrainBasin = [i for i in file_list if i not in test_basins_list]
@@ -171,13 +114,13 @@ model = ESN(input_size=input_size,
             input_scale=0.5)
 
 if non_arid_files:
-    output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BC-PCA-lasso_PUB_random_non_distributed_{reservoir_size}_{ridge_param}_non_arid'
+    output_base_dir = f'hyper/out/{loc}/BcReg_random_non_distributed_{reservoir_size}_{ridge_param}_non_arid'
 else:
-    output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BC-PCA-lasso_PUB_random_non_distributed_{reservoir_size}_{ridge_param}'
+    output_base_dir = f'hyper/out/{loc}/BcReg_random_non_distributed_{reservoir_size}_{ridge_param}'
 os.makedirs(output_base_dir, exist_ok=True)
-if os.path.exists(f'{output_base_dir}/BC-PCA-lasso_PUB_random_non_distributed{file_tag}_log.txt'):
-    open(f'{output_base_dir}/BC-PCA-lasso_PUB_random_non_distributed{file_tag}_log.txt', 'w').close()
-log_file = open(f'{output_base_dir}/BC-PCA-lasso_PUB_random_non_distributed{file_tag}_log.txt', 'a')
+if os.path.exists(f'{output_base_dir}/BcReg_random_non_distributed{file_tag}_log.txt'):
+    open(f'{output_base_dir}/BcReg_random_non_distributed{file_tag}_log.txt', 'w').close()
+log_file = open(f'{output_base_dir}/BcReg_random_non_distributed{file_tag}_log.txt', 'a')
 
 param_file_path = os.path.join(output_base_dir, 'parameters.txt')
 with open(param_file_path, 'w') as param_file:
@@ -193,9 +136,9 @@ with open(param_file_path, 'w') as param_file:
 #### BC TRAIN ####
 # BMA weights
 if BMA_data_exist:
-    bma_weights_df = pd.read_csv(f"/data0/funato/0_out/99_out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
-    bma_predict_cal_df = pd.read_csv(f"/data0/funato/0_out/99_out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
-    bma_predict_eva_df = pd.read_csv(f"/data0/funato/0_out/99_out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
+    bma_weights_df = pd.read_csv(f"hyper/out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
+    bma_predict_cal_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
+    bma_predict_eva_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
 
     bma_weights_df = bma_weights_df.to_dict(orient='index')
     bma_predict_cal_df = bma_predict_cal_df.to_dict(orient='index')
@@ -255,7 +198,7 @@ for train_basin_int in train_basin_int_list:
         log_file.write(f"start: {start_time_st}\n")
         log_file.flush()
 
-        output_fig_dir = f'/data0/funato/0_out/0_fig/{loc}/BC-PCA-lasso_PUB_random_non_distributed_{reservoir_size}_{ridge_param}/Train{train_basin_int}/sample{sample}'
+        output_fig_dir = f'/data0/funato/0_out/0_fig/{loc}/BcReg_random_non_distributed_{reservoir_size}_{ridge_param}/Train{train_basin_int}/sample{sample}'
         os.makedirs(output_fig_dir, exist_ok=True)
         #for subdir in [f'train_basin/results/sample{sample}', f'train_basin/predict/sample{sample}', f'train_basin/reservoir/sample{sample}']:
         #    os.makedirs(os.path.join(output_dir, subdir), exist_ok=True)
@@ -363,10 +306,10 @@ for train_basin_int in train_basin_int_list:
                                                                     sample = sample)
 
                 df_results_eva_rev = pd.DataFrame(result_eva_rev)
-                df_results_eva_rev.to_csv(output_dir + f'/{train_test}_basin/results/sample{sample}/BC-PCA-lasso_PUB_results{file_tag}_rev_PC{PC_n}_eva.csv', index=False)
+                df_results_eva_rev.to_csv(output_dir + f'/{train_test}_basin/results/sample{sample}/BcReg_results{file_tag}_rev_PC{PC_n}_eva.csv', index=False)
 
                 reservoir_rev_rows_df = pd.DataFrame(reservoir_rev_rows)
-                reservoir_rev_rows_df.to_csv(output_dir + f"/{train_test}_basin/reservoir/sample{sample}/BC-PCA-lasso_PUB_reservoir{file_tag}_rev_PC{PC_n}.csv", index=False, header=False)
+                reservoir_rev_rows_df.to_csv(output_dir + f"/{train_test}_basin/reservoir/sample{sample}/BcReg_reservoir{file_tag}_rev_PC{PC_n}.csv", index=False, header=False)
 
         end_time = datetime.now()
         end_time_st = end_time.strftime("%a %b %d %I:%M:%S %p JST %Y")

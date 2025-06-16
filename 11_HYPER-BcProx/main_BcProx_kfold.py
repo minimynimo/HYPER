@@ -56,7 +56,7 @@ if loc == "JP" and ver == 1:
     step_val_list = [2,4,8,15,20,25,30,40,50,68]
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
-    basin_data_df = pd.read_csv("/data0/funato/3_gis_data/JP/0_data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
+    basin_data_df = pd.read_csv("hyper/data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
     distance_matrix = pd.read_csv('/data0/funato/3_gis_data/JP/0_data/distance_matrix_v2_sorted.csv', index_col=0, header=0)
 elif loc == "US" and ver == 1:
     file_tot_num = 671
@@ -65,7 +65,7 @@ elif loc == "US" and ver == 2:
     basin_data_df = pd.read_csv("/data0/funato/3_gis_data/US/0_data/river_basin/dataset_US/pub_region_list_ver2_0.csv")
     distance_matrix = pd.read_csv('/data0/funato/3_gis_data/US/0_data/distance_matrix_sorted.csv', index_col=0, header=0)
 
-varssim_dir = f"/data0/funato/2_MERV/{loc}/varssim_nocal/{ver_name}"
+varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
 PosTrainBasin = list(range(1, file_tot_num+1))
 
 model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m10",
@@ -74,7 +74,7 @@ model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m1
               "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39", 
               "m42", "m43", "m44", "m46"]
 
-output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BcProx_kfold_{reservoir_size}_{ridge_param}_testtime'
+output_base_dir = f'hyper/out/{loc}/BcProx_kfold_{reservoir_size}_{ridge_param}_testtime'
 os.makedirs(output_base_dir, exist_ok=True)
 
 output_dir = f'{output_base_dir}'
@@ -90,9 +90,9 @@ log_file.write(f"start: {start_time_st}\n")
 
 # Load the BMA weights and predictions as dictionaries
 if BMA_data_exist:
-    bma_weights_df = pd.read_csv(f"/data0/funato/0_out/99_out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
-    bma_predict_cal_df = pd.read_csv(f"/data0/funato/0_out/99_out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
-    bma_predict_eva_df = pd.read_csv(f"/data0/funato/0_out/99_out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
+    bma_weights_df = pd.read_csv(f"hyper/out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
+    bma_predict_cal_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
+    bma_predict_eva_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
 
     bma_weights_df = bma_weights_df.to_dict(orient='index')
     bma_predict_cal_df = bma_predict_cal_df.to_dict(orient='index')
@@ -134,7 +134,7 @@ for subdir in ['test_basin/results', 'test_basin/predict']:
     os.makedirs(os.path.join(output_dir, subdir), exist_ok=True)
 
 if BC_data_exist:
-    W_out_og_rows = pd.read_csv(f'/data0/funato/0_out/99_out/{loc}/BC_{reservoir_size}/Wout/BC_Wout{file_tag}_bma.csv', header=None, index_col=0)
+    W_out_og_rows = pd.read_csv(f'hyper/out/{loc}/BC_{reservoir_size}/Wout/BC_Wout{file_tag}_bma.csv', header=None, index_col=0)
     W_out_og_rows = W_out_og_rows.reset_index().values.tolist()
     W_out_weights_og = pd.DataFrame(W_out_og_rows)
 else:

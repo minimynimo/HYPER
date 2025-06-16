@@ -65,7 +65,7 @@ elif loc == "US" and ver == 2:
     step_val_list = [2,4,6,12,24,47,84,125,149,168,277] #### Train basin num: 299,150,100,50,25,13,7,5,4,3,3
     step_val_list = [149,168,277]
 
-varssim_dir = f"/data0/funato/2_MERV/{loc}/varssim_nocal/{ver_name}"
+varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
 
 PosTrainBasin = [i for i in range(1,file_tot_num) if i not in test_basins_list]
 
@@ -83,7 +83,7 @@ model = ESN(input_size=input_size,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 
-output_base_dir = f'/data0/funato/0_out/99_out/{loc}/BcProx_{reservoir_size}_{ridge_param}'
+output_base_dir = f'hyper/out/{loc}/BcProx_{reservoir_size}_{ridge_param}'
 os.makedirs(output_base_dir, exist_ok=True)
 param_file_path = os.path.join(output_base_dir, 'parameters.txt')
 with open(param_file_path, 'w') as param_file:
@@ -197,7 +197,7 @@ for start_val in start_val_list:
             # reservoir (R, )
 
             #W_out_df = pd.DataFrame(W_out)
-            #W_out_df.to_csv(f"/data0/funato/0_out/99_out/{loc}/BcProx/W_out_file_{file_num}.csv", index=False)
+            #W_out_df.to_csv(f"hyper/out/{loc}/BcProx/W_out_file_{file_num}.csv", index=False)
             error_train_cal = model.predict(reservoir, input_train_cal, ptb_func=None, ptb_scale=1.0, nexttime=nexttime, extended_interval=10)
             error_train_eva = model.predict(reservoir, input_train_eva, ptb_func=None, ptb_scale=1.0, nexttime=nexttime, extended_interval=10)
 

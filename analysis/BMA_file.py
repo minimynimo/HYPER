@@ -32,7 +32,7 @@ elif loc == "AUS" and ver == 2:
     file_tot_num = 84
 elif loc == "GB" and ver == 2:
     file_tot_num = 396
-varssim_dir = f"/data0/funato/2_MERV/{loc}/varssim_nocal/{ver_name}"
+varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
 
 
 # Define the calibration and evaluation periods
@@ -48,7 +48,7 @@ model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m1
               "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39",
               "m42", "m43", "m44", "m46"]
 
-output_dir = f'/data0/funato/0_out/99_out/{loc}/BMA'
+output_dir = f'hyper/out/{loc}/BMA'
 os.makedirs(output_dir + '/results', exist_ok=True)
 os.makedirs(output_dir + '/predict', exist_ok=True)
 os.makedirs(output_dir + '/weights', exist_ok=True)

@@ -11,11 +11,7 @@ import os
 #####################
 benchmark_list = ["KGE","NSE","E1","VE", "d","RMSE","MAE"]
 
-spin = 1
-
 nexttime = True
-#arid_files = True
-arid_files = False
 
 buf = ""
 
@@ -29,16 +25,9 @@ washout = 0
 ridge_param = 0.001 
 
 #loc, ver = "JP", 1
-#loc, ver = "JP", 2
-#loc, ver = "US", 1
-#loc, ver = "US", 2
-#loc, ver = "AUS", 2
-loc, ver = "GB", 2
+loc, ver = "JP", 2
 
-if loc != "US":
-    arid_files = False
-
-file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}"
+file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}"
 #####################
 print(file_tag)
 
@@ -47,43 +36,21 @@ if loc == "JP" and ver == 1:
     file_tot_num  = 135
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
-elif loc == "US" and ver == 1:
-    file_tot_num = 669
-elif loc == "US" and ver == 2:
-    file_tot_num = 667
-    arid_file_list = "/data0/funato/3_gis_data/US/0_data/river_basin/dataset_US/arid_file_num.csv"
-elif loc == "AUS" and ver == 2:
-    file_tot_num = 84
-elif loc == "GB" and ver == 2:
-    file_tot_num = 396
-varssim_dir = f"/data0/funato/2_MERV/{loc}/varssim_nocal/{ver_name}"
+varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
 
-if arid_files:
-    arid_file_list = pd.read_csv(arid_file_list)
-    file_list = arid_file_list['File_num'].tolist()
-    file_list.sort()
-else:
-    file_list = list(range(1, file_tot_num+1))
+file_list = list(range(1, file_tot_num+1))
 
 start_date_cal = '1993-01-01'
 end_date_cal = '2000-12-31'
 start_date_eva = '2001-01-01'
 end_date_eva = '2006-12-31'
 
-if arid_files:
-    output_dir = f'/data0/funato/0_out/99_out/{loc}/RC_{reservoir_size}_{ridge_param}_arid'
-else:
-    output_dir = f'/data0/funato/0_out/99_out/{loc}/RC_{reservoir_size}_{ridge_param}'
+output_dir = f'hyper/out/{loc}/RC_{reservoir_size}_{ridge_param}'
+
 os.makedirs(output_dir + '/results', exist_ok=True)
 os.makedirs(output_dir + '/predict', exist_ok=True)
 os.makedirs(output_dir + '/Wout', exist_ok=True)
 
-# List of models
-model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m10",
-              "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18", "m19", "m20",
-              "m21", "m22", "m23", "m24", "m25", "m26", "m27", "m28", "m29", "m30",
-              "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39",
-              "m42", "m43", "m44", "m46"]
 
 def file_name(input_num, total_len):
     car_len = len(str(input_num))
@@ -132,25 +99,12 @@ def BMK(obs_data,sim_data,benchmark):
         if obs_ave == 0:
             obs_ave = 1e-6
         return 1 - np.sqrt((r - 1)**2 + ((sim_std / obs_std) - 1)**2 + ((sim_ave / obs_ave) - 1)**2)
-    
-    elif benchmark == "logNSE":
-        temp_obs_data = np.where((obs_data <= 0) | np.isnan(obs_data), 1e-6, obs_data)
-        temp_sim_data = np.where((sim_data <= 0) | np.isnan(sim_data), 1e-6, sim_data)
-        obs_ave = np.mean(temp_obs_data)
-        numer = np.sum((np.log(temp_sim_data) - np.log(temp_obs_data))**2)
-        denom = np.sum((np.log(temp_obs_data) - np.log(obs_ave))**2)
-        return 1 - numer / denom
+
     
     elif benchmark == "E1":
         obs_ave = np.mean(obs_data)
         return 1 - (np.sum(np.abs(obs_data - sim_data)) / np.sum(np.abs(obs_data - obs_ave)))
-    
-    elif benchmark == "Erel":
-        obs_ave = np.mean(obs_data)
-        temp_obs_data = np.where(obs_data == 0, 1e-6, obs_data)
-        numer = np.sum(np.square((temp_obs_data - sim_data) / temp_obs_data))
-        denom = np.sum(np.square((obs_data - obs_ave) / obs_ave))
-        return 1 - numer / denom
+
     
     elif benchmark == "VE":
         return 1 - np.sum(np.abs(obs_data - sim_data)) / np.sum(obs_data)
@@ -195,7 +149,6 @@ for file_num in file_list:
 
     ### INPUT DATA ###
     df = load_data(file_num)
-    #df = df[['Precip', 'Obs flow'] + model_list]
 
     df_cal = df[start_date_cal:end_date_cal].copy()  # Use copy to avoid SettingWithCopyWarning
     df_eva = df[start_date_eva:end_date_eva].copy()
@@ -246,7 +199,7 @@ for file_num in file_list:
     # precip_eva:  INPUT OF THE ESN , EX; PRECIPITATION, TEMPERATURE, OTHER INPUTS
     # obs_eva: EVALUATE THE TEST OBSERVED, SHIFTED ONE TIMESTEP OF TRAIN DATA TO PREDICT,EX: OBSERVED FLOW
 
-    W_out, reservoir = model.train(input_cal, target_data=target_cal, washout=washout, ridge_param=ridge_param, spinup = spin)
+    W_out, reservoir = model.train(input_cal, target_data=target_cal, washout=washout, ridge_param=ridge_param)
 
     # W_out (1,R)
     # reservoir (R, )

@@ -239,121 +239,121 @@ def create_cdf_plot(ax, plot_df, benchmark, train_test):
     #ax.legend(handles, labels, ncol=3, fontsize=fs * 0.8, loc='upper left')
     ax.legend(handles, labels, ncol=3, loc='center left', bbox_to_anchor=(1, 0.5), fontsize=fs * 1.3)
 
-def load_BC_PUB_data(train_basin_int, benchmark):
-    BC_PUB_sum_data = None
-    BC_PUB_all_samples = []  # Store all samples for percentile calculations
+def load_BcProx_data(train_basin_int, benchmark):
+    BcProx_sum_data = None
+    BcProx_all_samples = []  # Store all samples for percentile calculations
     for sample in range(1, samples + 1):
         if completely_random:
-            BC_PUB_data = f'/data0/funato/0_out/99_out/{loc}/BC_PUB_random_non_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}/Train{train_basin_int}/test_basin/results/BC_PUB_results_Train{train_basin_int}_sample{sample}_eva.csv'
+            BcProx_data = f'hyper/out/{loc}/BcProx_random_non_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}/Train{train_basin_int}/test_basin/results/BcProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
         else:
-            BC_PUB_data = f'/data0/funato/0_out/99_out/{loc}/BC_PUB_random_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}/Train{train_basin_int}/test_basin/results/BC_PUB_results_Train{train_basin_int}_sample{sample}_eva.csv'
-        BC_PUB_df = pd.read_csv(BC_PUB_data, index_col=0)
-        BC_PUB_df = BC_PUB_df.sort_values(by='file_num')
-        BC_PUB_df = pd.DataFrame(BC_PUB_df.values)
+            BcProx_data = f'hyper/out/{loc}/BcProx_random_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}/Train{train_basin_int}/test_basin/results/BcProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
+        BcProx_df = pd.read_csv(BcProx_data, index_col=0)
+        BcProx_df = BcProx_df.sort_values(by='file_num')
+        BcProx_df = pd.DataFrame(BcProx_df.values)
 
-        BC_PUB_all_samples.append(BC_PUB_df.values)  # Collect data for all samples  (samples, test basins, benchmark)
+        BcProx_all_samples.append(BcProx_df.values)  # Collect data for all samples  (samples, test basins, benchmark)
 
-        if BC_PUB_sum_data is None:
-            BC_PUB_sum_data = BC_PUB_df.copy()
+        if BcProx_sum_data is None:
+            BcProx_sum_data = BcProx_df.copy()
         else:
-            BC_PUB_sum_data = BC_PUB_sum_data.add(BC_PUB_df, fill_value=0)
+            BcProx_sum_data = BcProx_sum_data.add(BcProx_df, fill_value=0)
 
     
     # Calculate mean
-    BC_PUB_mean_data = BC_PUB_sum_data.copy()
-    BC_PUB_mean_data = BC_PUB_mean_data.divide(samples)
-    BC_PUB_mean_data.columns = benchmark_list
-    BC_PUB_mean_data.index.name = 'file_num'
-    BC_PUB_mean_data = BC_PUB_mean_data[[benchmark]]
-    BC_PUB_mean_data.index = test_basins_list  # Ensure index is set
+    BcProx_mean_data = BcProx_sum_data.copy()
+    BcProx_mean_data = BcProx_mean_data.divide(samples)
+    BcProx_mean_data.columns = benchmark_list
+    BcProx_mean_data.index.name = 'file_num'
+    BcProx_mean_data = BcProx_mean_data[[benchmark]]
+    BcProx_mean_data.index = test_basins_list  # Ensure index is set
 
     # Calculate 10% and 90% distributions
-    BC_PUB_all_samples = np.array(BC_PUB_all_samples)  # Convert to numpy array for percentile calculations
-    BC_PUB_10th_data = np.percentile(BC_PUB_all_samples, 10, axis=0)
-    BC_PUB_90th_data = np.percentile(BC_PUB_all_samples, 90, axis=0)
+    BcProx_all_samples = np.array(BcProx_all_samples)  # Convert to numpy array for percentile calculations
+    BcProx_10th_data = np.percentile(BcProx_all_samples, 10, axis=0)
+    BcProx_90th_data = np.percentile(BcProx_all_samples, 90, axis=0)
 
-    BC_PUB_10th_data = pd.DataFrame(BC_PUB_10th_data, columns=benchmark_list, index=test_basins_list)
-    BC_PUB_90th_data = pd.DataFrame(BC_PUB_90th_data, columns=benchmark_list, index=test_basins_list)
+    BcProx_10th_data = pd.DataFrame(BcProx_10th_data, columns=benchmark_list, index=test_basins_list)
+    BcProx_90th_data = pd.DataFrame(BcProx_90th_data, columns=benchmark_list, index=test_basins_list)
 
-    BC_PUB_10th_data = BC_PUB_10th_data[[benchmark]]
-    BC_PUB_90th_data = BC_PUB_90th_data[[benchmark]]
+    BcProx_10th_data = BcProx_10th_data[[benchmark]]
+    BcProx_90th_data = BcProx_90th_data[[benchmark]]
 
-    return BC_PUB_mean_data, BC_PUB_10th_data, BC_PUB_90th_data
+    return BcProx_mean_data, BcProx_10th_data, BcProx_90th_data
 
-def load_BMA_PUB_data(train_basin_int, benchmark):
-    BMA_PUB_sum_data = None
-    BMA_PUB_all_samples = []  # Store all samples for percentile calculations
+def load_BmaProx_data(train_basin_int, benchmark):
+    BmaProx_sum_data = None
+    BmaProx_all_samples = []  # Store all samples for percentile calculations
     for sample in range(1, samples + 1):
         if completely_random:
-            BMA_PUB_data = f'/data0/funato/0_out/99_out/{loc}/BMA_PUB_random_non_distributed{non_arid_buf}/Train{train_basin_int}/test_basin/results/BMA_PUB_results_Train{train_basin_int}_sample{sample}_eva.csv'
+            BmaProx_data = f'hyper/out/{loc}/BmaProx_random_non_distributed{non_arid_buf}/Train{train_basin_int}/test_basin/results/BmaProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
         else:
-            BMA_PUB_data = f'/data0/funato/0_out/99_out/{loc}/BMA_PUB_random_distributed{non_arid_buf}/Train{train_basin_int}/test_basin/results/BMA_PUB_results_Train{train_basin_int}_sample{sample}_eva.csv'
-        BMA_PUB_df = pd.read_csv(BMA_PUB_data, index_col=0)
-        BMA_PUB_df = BMA_PUB_df.sort_values(by='file_num')
-        BMA_PUB_df = pd.DataFrame(BMA_PUB_df.values)
+            BmaProx_data = f'hyper/out/{loc}/BmaProx_random_distributed{non_arid_buf}/Train{train_basin_int}/test_basin/results/BmaProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
+        BmaProx_df = pd.read_csv(BmaProx_data, index_col=0)
+        BmaProx_df = BmaProx_df.sort_values(by='file_num')
+        BmaProx_df = pd.DataFrame(BmaProx_df.values)
 
-        BMA_PUB_all_samples.append(BMA_PUB_df.values)  # Collect data for all samples  (samples, test basins, benchmark)
+        BmaProx_all_samples.append(BmaProx_df.values)  # Collect data for all samples  (samples, test basins, benchmark)
 
-        if BMA_PUB_sum_data is None:
-            BMA_PUB_sum_data = BMA_PUB_df.copy()
+        if BmaProx_sum_data is None:
+            BmaProx_sum_data = BmaProx_df.copy()
         else:
-            BMA_PUB_sum_data = BMA_PUB_sum_data.add(BMA_PUB_df, fill_value=0)
+            BmaProx_sum_data = BmaProx_sum_data.add(BmaProx_df, fill_value=0)
     
-    BMA_PUB_mean_data = BMA_PUB_sum_data.copy()
-    BMA_PUB_mean_data = BMA_PUB_mean_data.divide(samples)
-    BMA_PUB_mean_data.columns = benchmark_list
-    BMA_PUB_mean_data.index.name = 'file_num'
-    BMA_PUB_mean_data = BMA_PUB_mean_data[[benchmark]]
-    BMA_PUB_mean_data.index = test_basins_list  # Ensure index is set
+    BmaProx_mean_data = BmaProx_sum_data.copy()
+    BmaProx_mean_data = BmaProx_mean_data.divide(samples)
+    BmaProx_mean_data.columns = benchmark_list
+    BmaProx_mean_data.index.name = 'file_num'
+    BmaProx_mean_data = BmaProx_mean_data[[benchmark]]
+    BmaProx_mean_data.index = test_basins_list  # Ensure index is set
 
     # Calculate 10% and 90% distributions
-    BMA_PUB_all_samples = np.array(BMA_PUB_all_samples)  # Convert to numpy array for percentile calculations
-    BMA_PUB_10th_data = np.percentile(BMA_PUB_all_samples, 10, axis=0)
-    BMA_PUB_90th_data = np.percentile(BMA_PUB_all_samples, 90, axis=0)
-    BMA_PUB_10th_data = pd.DataFrame(BMA_PUB_10th_data, columns=benchmark_list, index=test_basins_list)
-    BMA_PUB_90th_data = pd.DataFrame(BMA_PUB_90th_data, columns=benchmark_list, index=test_basins_list)
-    BMA_PUB_10th_data = BMA_PUB_10th_data[[benchmark]]
-    BMA_PUB_90th_data = BMA_PUB_90th_data[[benchmark]]
+    BmaProx_all_samples = np.array(BmaProx_all_samples)  # Convert to numpy array for percentile calculations
+    BmaProx_10th_data = np.percentile(BmaProx_all_samples, 10, axis=0)
+    BmaProx_90th_data = np.percentile(BmaProx_all_samples, 90, axis=0)
+    BmaProx_10th_data = pd.DataFrame(BmaProx_10th_data, columns=benchmark_list, index=test_basins_list)
+    BmaProx_90th_data = pd.DataFrame(BmaProx_90th_data, columns=benchmark_list, index=test_basins_list)
+    BmaProx_10th_data = BmaProx_10th_data[[benchmark]]
+    BmaProx_90th_data = BmaProx_90th_data[[benchmark]]
 
-    return BMA_PUB_mean_data, BMA_PUB_10th_data, BMA_PUB_90th_data
+    return BmaProx_mean_data, BmaProx_10th_data, BmaProx_90th_data
     
-def load_BC_PCA_lasso_PUB_data(pc, train_basin_int, benchmark):
-    BC_PCA_PUB_sum_data = None
-    BC_PCA_PUB_all_samples = []  
+def load_BcReg_data(pc, train_basin_int, benchmark):
+    BcReg_sum_data = None
+    BcReg_all_samples = []  
     for sample in range(1, samples + 1):
         if completely_random:
-            BC_PCA_PUB_data = f'/data0/funato/0_out/99_out/{loc}/BC-PCA-lasso_PUB_random_non_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}/Train{train_basin_int}/test_basin/results/sample{sample}/BC-PCA-lasso_PUB_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
+            BcReg_data = f'hyper/out/{loc}/BcReg_random_non_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}/Train{train_basin_int}/test_basin/results/sample{sample}/BcReg_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
         else:
-            BC_PCA_PUB_data = f'/data0/funato/0_out/99_out/{loc}/BC-PCA-lasso_PUB_random_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}/Train{train_basin_int}/test_basin/results/sample{sample}/BC-PCA-lasso_PUB_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
-        BC_PCA_PUB_df = pd.read_csv(BC_PCA_PUB_data, index_col=0)
-        BC_PCA_PUB_df = BC_PCA_PUB_df.sort_values(by='file_num')
-        BC_PCA_PUB_df = pd.DataFrame(BC_PCA_PUB_df.values)
+            BcReg_data = f'hyper/out/{loc}/BcReg_random_distributed_{reservoir_size}_{ridge_param}{non_arid_buf}/Train{train_basin_int}/test_basin/results/sample{sample}/BcReg_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
+        BcReg_df = pd.read_csv(BcReg_data, index_col=0)
+        BcReg_df = BcReg_df.sort_values(by='file_num')
+        BcReg_df = pd.DataFrame(BcReg_df.values)
 
-        BC_PCA_PUB_all_samples.append(BC_PCA_PUB_df.values)  # Collect data for all samples  (samples, test basins, benchmark)
+        BcReg_all_samples.append(BcReg_df.values)  # Collect data for all samples  (samples, test basins, benchmark)
 
-        if BC_PCA_PUB_sum_data is None:
-            BC_PCA_PUB_sum_data = BC_PCA_PUB_df.copy()
+        if BcReg_sum_data is None:
+            BcReg_sum_data = BcReg_df.copy()
         else:
-            BC_PCA_PUB_sum_data = BC_PCA_PUB_sum_data.add(BC_PCA_PUB_df, fill_value=0)
+            BcReg_sum_data = BcReg_sum_data.add(BcReg_df, fill_value=0)
     
-    BC_PCA_PUB_mean_data = BC_PCA_PUB_sum_data.copy()
-    BC_PCA_PUB_mean_data = BC_PCA_PUB_mean_data.divide(samples)
-    BC_PCA_PUB_mean_data.index = test_basins_list
-    BC_PCA_PUB_mean_data.columns = benchmark_list
-    BC_PCA_PUB_mean_data.index.name = 'file_num'
-    BC_PCA_PUB_mean_data = BC_PCA_PUB_mean_data[[benchmark]]
-    BC_PCA_PUB_mean_data.index = test_basins_list  # Ensure index is set
+    BcReg_mean_data = BcReg_sum_data.copy()
+    BcReg_mean_data = BcReg_mean_data.divide(samples)
+    BcReg_mean_data.index = test_basins_list
+    BcReg_mean_data.columns = benchmark_list
+    BcReg_mean_data.index.name = 'file_num'
+    BcReg_mean_data = BcReg_mean_data[[benchmark]]
+    BcReg_mean_data.index = test_basins_list  # Ensure index is set
 
     # Calculate 10% and 90% distributions
-    BC_PCA_PUB_all_samples = np.array(BC_PCA_PUB_all_samples)  # Convert to numpy array for percentile calculations
-    BC_PCA_PUB_10th_data = np.percentile(BC_PCA_PUB_all_samples, 10, axis=0)
-    BC_PCA_PUB_90th_data = np.percentile(BC_PCA_PUB_all_samples, 90, axis=0)
-    BC_PCA_PUB_10th_data = pd.DataFrame(BC_PCA_PUB_10th_data, columns=benchmark_list, index=test_basins_list)
-    BC_PCA_PUB_90th_data = pd.DataFrame(BC_PCA_PUB_90th_data, columns=benchmark_list, index=test_basins_list)
-    BC_PCA_PUB_10th_data = BC_PCA_PUB_10th_data[[benchmark]]
-    BC_PCA_PUB_90th_data = BC_PCA_PUB_90th_data[[benchmark]]
+    BcReg_all_samples = np.array(BcReg_all_samples)  # Convert to numpy array for percentile calculations
+    BcReg_10th_data = np.percentile(BcReg_all_samples, 10, axis=0)
+    BcReg_90th_data = np.percentile(BcReg_all_samples, 90, axis=0)
+    BcReg_10th_data = pd.DataFrame(BcReg_10th_data, columns=benchmark_list, index=test_basins_list)
+    BcReg_90th_data = pd.DataFrame(BcReg_90th_data, columns=benchmark_list, index=test_basins_list)
+    BcReg_10th_data = BcReg_10th_data[[benchmark]]
+    BcReg_90th_data = BcReg_90th_data[[benchmark]]
 
-    return BC_PCA_PUB_mean_data, BC_PCA_PUB_10th_data, BC_PCA_PUB_90th_data
+    return BcReg_mean_data, BcReg_10th_data, BcReg_90th_data
 
 def load_LSTM_PUB_data(train_basin_int, benchmark):
     if not LSTM_cdf:
@@ -361,7 +361,7 @@ def load_LSTM_PUB_data(train_basin_int, benchmark):
     LSTM_PUB_sum_data = None
     LSTM_PUB_all_samples = []  # Store all samples for percentile calculations
     for sample in range(1, samples + 1):
-        LSTM_PUB_data = f'/data0/funato/0_out/99_out/{loc}/LSTM_PUB_random/ensemble/Train{train_basin_int}/test_basin/results/LSTM_PUB_results_Train{train_basin_int}_sample{sample}_eva.csv'
+        LSTM_PUB_data = f'hyper/out/{loc}/LSTM_PUB_random/ensemble/Train{train_basin_int}/test_basin/results/LSTM_PUB_results_Train{train_basin_int}_sample{sample}_eva.csv'
         LSTM_PUB_df = pd.read_csv(LSTM_PUB_data, index_col=0) # the data of the test basin for the sample
         LSTM_PUB_df = LSTM_PUB_df.sort_values(by='file_num')
         LSTM_PUB_df = pd.DataFrame(LSTM_PUB_df.values)
@@ -393,7 +393,7 @@ def load_LSTM_PUB_data(train_basin_int, benchmark):
     return LSTM_PUB_mean_data, LSTM_PUB_10th_data, LSTM_PUB_90th_data
 
 def load_BC_data(benchmark):
-    BC_data = f'/data0/funato/0_out/99_out/{loc}/BC_700_0.001/results/BC_results_r700_s1_sr0.4_rr0.001_bma_eva.csv'
+    BC_data = f'hyper/out/{loc}/BC_700_0.001/results/BC_results_r700_s1_sr0.4_rr0.001_bma_eva.csv'
     BC_df = pd.read_csv(BC_data)
     BC_column = f'BC_r700_s1_sr0.4_rr0.001_bma_{benchmark}_eva'
     BC_data = BC_df[BC_column]
@@ -439,17 +439,6 @@ calc_mode_to_name = {
 }
 
 
-benchmark_limits_cdf = {
-    'KGE': {'min': -0.2, 'max': 1},
-    'NSE': {'min': -1, 'max': 1},
-    'logNSE': {'min': -150, 'max': 1},
-    'E1': {'min': -1, 'max': 1},
-    'VE': {'min': -2, 'max': 1},
-    'd': {'min': 0, 'max': 1},
-    'RMSE': {'min': 0, 'max': 10},
-    'MAE': {'min': 0, 'max': 10}
-}
-
 benchmark_limits_cdf_summary = {
     'KGE': {'min': -1.5, 'max': 1},
     'NSE': {'min': -4.0, 'max': 1},
@@ -463,9 +452,9 @@ benchmark_limits_cdf_summary = {
 
 style_scheme = {
     'LSTM':     {'color': '#2ca02c', 'alpha': 0.1, 'linestyle': ':'},   # green
-    # 'BcProx':   {'color': '#7b3294', 'alpha': 0.1, 'linestyle': '--'},  # Removed BcProx style
+    'BcProx':   {'color': '#7b3294', 'alpha': 0.1, 'linestyle': '--'},  # Removed BcProx style
     'BcReg':    {'color': '#d7191c', 'alpha': 0.1, 'linestyle': '-'},   # red
-    'BmaProx':  {'color': '#1f78b4', 'alpha': 0.1, 'linestyle': '-.'}   # blue (if needed)
+    #'BmaProx':  {'color': '#1f78b4', 'alpha': 0.1, 'linestyle': '-.'}   # blue (if needed)
 }
 
 
@@ -495,20 +484,20 @@ for benchmark in benchmark_list:
                     samples = samples_
 
                 if 'BMA' in calc_mode:
-                    BMA_PUB_column_test_data, BMA_PUB_10_data, BMA_PUB_90_data = load_BMA_PUB_data(train_basin_int, benchmark)
+                    BmaProx_column_test_data, BmaProx_10_data, BmaProx_90_data = load_BmaProx_data(train_basin_int, benchmark)
 
                 if 'BC' in calc_mode and BC_Prox_cdf:
-                    BC_PUB_column_test_data, BC_PUB_10_data, BC_PUB_90_data = load_BC_PUB_data(train_basin_int, benchmark)
+                    BcProx_column_test_data, BcProx_10_data, BcProx_90_data = load_BcProx_data(train_basin_int, benchmark)
                     plot_test_df_cdf = pd.concat([plot_test_df_cdf, pd.DataFrame({
-                        f'{calc_name} {train_int_tag_name}{train_basin_int}': BC_PUB_column_test_data.values.flatten()
+                        f'{calc_name} {train_int_tag_name}{train_basin_int}': BcProx_column_test_data.values.flatten()
                     }, index=test_basins_list)], axis=1)
 
                 elif calc_mode == 'PCA_norm':
                     for pc in range(1, n_components + 1):
-                        BC_PCA_lasso_PUB_column_test_data, BC_PCA_lasso_PUB_10_data, BC_PCA_lasso_PUB_90_data = load_BC_PCA_lasso_PUB_data(pc, train_basin_int, benchmark)
+                        BcReg_column_test_data, BcReg_10_data, BcReg_90_data = load_BcReg_data(pc, train_basin_int, benchmark)
                         if pc ==3:
                             plot_test_df_cdf = pd.concat([plot_test_df_cdf, pd.DataFrame({
-                                f'{calc_name} {train_int_tag_name}{train_basin_int}': BC_PCA_lasso_PUB_column_test_data.values.flatten()
+                                f'{calc_name} {train_int_tag_name}{train_basin_int}': BcReg_column_test_data.values.flatten()
                             }, index=test_basins_list)], axis=1)
 
                 elif calc_mode == 'LSTM_norm' and LSTM_cdf:  # Only process LSTM if LSTM_cdf is True
@@ -579,22 +568,22 @@ for benchmark in benchmark_list:
                 samples = samples_
 
             if 'BMA' in calc_mode:
-                BMA_PUB_column_test_data, BMA_PUB_10_data, BMA_PUB_90_data = load_BMA_PUB_data(train_basin_int, benchmark)
-                mean_values.append(BMA_PUB_column_test_data.mean().values[0])
-                lower_bounds.append(BMA_PUB_10_data.mean().values[0])
-                upper_bounds.append(BMA_PUB_90_data.mean().values[0])
+                BmaProx_column_test_data, BmaProx_10_data, BmaProx_90_data = load_BmaProx_data(train_basin_int, benchmark)
+                mean_values.append(BmaProx_column_test_data.mean().values[0])
+                lower_bounds.append(BmaProx_10_data.mean().values[0])
+                upper_bounds.append(BmaProx_90_data.mean().values[0])
             elif 'BC' in calc_mode and BC_Prox_cdf:
-                BC_PUB_column_test_data, BC_PUB_10_data, BC_PUB_90_data = load_BC_PUB_data(train_basin_int, benchmark)
-                mean_values.append(BC_PUB_column_test_data.mean().values[0])
-                lower_bounds.append(BC_PUB_10_data.mean().values[0])
-                upper_bounds.append(BC_PUB_90_data.mean().values[0])
+                BcProx_column_test_data, BcProx_10_data, BcProx_90_data = load_BcProx_data(train_basin_int, benchmark)
+                mean_values.append(BcProx_column_test_data.mean().values[0])
+                lower_bounds.append(BcProx_10_data.mean().values[0])
+                upper_bounds.append(BcProx_90_data.mean().values[0])
             elif 'PCA' in calc_mode:
                 for pc in range(1, n_components + 1):
-                    BC_PCA_lasso_PUB_column_test_data, BC_PCA_lasso_PUB_10_data, BC_PCA_lasso_PUB_90_data = load_BC_PCA_lasso_PUB_data(pc, train_basin_int, benchmark)
+                    BcReg_column_test_data, BcReg_10_data, BcReg_90_data = load_BcReg_data(pc, train_basin_int, benchmark)
                     if pc == 3:
-                        mean_values.append(BC_PCA_lasso_PUB_column_test_data.mean().values[0])
-                        lower_bounds.append(BC_PCA_lasso_PUB_10_data.mean().values[0])
-                        upper_bounds.append(BC_PCA_lasso_PUB_90_data.mean().values[0])
+                        mean_values.append(BcReg_column_test_data.mean().values[0])
+                        lower_bounds.append(BcReg_10_data.mean().values[0])
+                        upper_bounds.append(BcReg_90_data.mean().values[0])
             elif 'LSTM' in calc_mode:
                 LSTM_PUB_column_test_data, LSTM_PUB_10_data, LSTM_PUB_90_data = load_LSTM_PUB_data(train_basin_int, benchmark)
                 mean_values.append(LSTM_PUB_column_test_data.mean().values[0])
@@ -658,22 +647,22 @@ for benchmark in benchmark_list:
             else:
                 samples = samples_
             if 'BMA' in calc_mode:
-                BMA_PUB_column_test_data, BMA_PUB_10_data, BMA_PUB_90_data = load_BMA_PUB_data(train_basin_int, benchmark)
-                mean_values.append(BMA_PUB_column_test_data.mean().values[0])
-                lower_bounds.append(BMA_PUB_10_data.mean().values[0])
-                upper_bounds.append(BMA_PUB_90_data.mean().values[0])
+                BmaProx_column_test_data, BmaProx_10_data, BmaProx_90_data = load_BmaProx_data(train_basin_int, benchmark)
+                mean_values.append(BmaProx_column_test_data.mean().values[0])
+                lower_bounds.append(BmaProx_10_data.mean().values[0])
+                upper_bounds.append(BmaProx_90_data.mean().values[0])
             elif 'BC' in calc_mode and BC_Prox_cdf:
-                BC_PUB_column_test_data, BC_PUB_10_data, BC_PUB_90_data = load_BC_PUB_data(train_basin_int, benchmark)
-                mean_values.append(BC_PUB_column_test_data.mean().values[0])
-                lower_bounds.append(BC_PUB_10_data.mean().values[0])
-                upper_bounds.append(BC_PUB_90_data.mean().values[0])
+                BcProx_column_test_data, BcProx_10_data, BcProx_90_data = load_BcProx_data(train_basin_int, benchmark)
+                mean_values.append(BcProx_column_test_data.mean().values[0])
+                lower_bounds.append(BcProx_10_data.mean().values[0])
+                upper_bounds.append(BcProx_90_data.mean().values[0])
             elif 'PCA' in calc_mode:
                 for pc in range(1, n_components + 1):
-                    BC_PCA_lasso_PUB_column_test_data, BC_PCA_lasso_PUB_10_data, BC_PCA_lasso_PUB_90_data = load_BC_PCA_lasso_PUB_data(pc, train_basin_int, benchmark)
+                    BcReg_column_test_data, BcReg_10_data, BcReg_90_data = load_BcReg_data(pc, train_basin_int, benchmark)
                     if pc == 3:
-                        mean_values.append(BC_PCA_lasso_PUB_column_test_data.mean().values[0])
-                        lower_bounds.append(BC_PCA_lasso_PUB_10_data.mean().values[0])
-                        upper_bounds.append(BC_PCA_lasso_PUB_90_data.mean().values[0])
+                        mean_values.append(BcReg_column_test_data.mean().values[0])
+                        lower_bounds.append(BcReg_10_data.mean().values[0])
+                        upper_bounds.append(BcReg_90_data.mean().values[0])
         style = style_scheme.get(calc_name, {'color': 'black', 'alpha': 0.15, 'linestyle': '-'})
         jitter = 0.1 * list(style_scheme).index(calc_name)
         jittered_mean = [m + jitter for m in mean_values]
@@ -786,11 +775,11 @@ for benchmark in benchmark_list:
                 upper_bounds_dict['LSTM'].append(LSTM_PUB_90_data.mean().values[0])
             elif calc_mode == 'PCA_norm':
                 for pc in range(1, n_components + 1):
-                    BC_PCA_lasso_PUB_column_test_data, BC_PCA_lasso_PUB_10_data, BC_PCA_lasso_PUB_90_data = load_BC_PCA_lasso_PUB_data(pc, train_basin_int, benchmark)
+                    BcReg_column_test_data, BcReg_10_data, BcReg_90_data = load_BcReg_data(pc, train_basin_int, benchmark)
                     if pc == 3:
-                        mean_values_dict['BcReg'].append(BC_PCA_lasso_PUB_column_test_data.mean().values[0])
-                        lower_bounds_dict['BcReg'].append(BC_PCA_lasso_PUB_10_data.mean().values[0])
-                        upper_bounds_dict['BcReg'].append(BC_PCA_lasso_PUB_90_data.mean().values[0])
+                        mean_values_dict['BcReg'].append(BcReg_column_test_data.mean().values[0])
+                        lower_bounds_dict['BcReg'].append(BcReg_10_data.mean().values[0])
+                        upper_bounds_dict['BcReg'].append(BcReg_90_data.mean().values[0])
 
     for calc_name in ['LSTM', 'BcReg']:
         style = style_scheme.get(calc_name, {'color': 'black', 'alpha': 0.15, 'linestyle': '-'})

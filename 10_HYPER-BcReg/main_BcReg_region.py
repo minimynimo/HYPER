@@ -53,7 +53,7 @@ ridge_param = 1.0
 
 
 ver_name = "ver1_1" if ver == 1 else "ver2_0" 
-attribute_dir = f'/data0/funato/3_gis_data/{loc}/0_data/river_basin/dataset_{loc}'
+attribute_dir = f'hyper/data/river_basin/dataset_{loc}'
 
 if loc == "JP" and ver == 1:
     file_tot_num  = 135
@@ -69,7 +69,7 @@ elif loc == "JP" and ver == 2:
     columns_drop = ['File_num','grdc_no','river','station','lat_org','long_org']
     region_list = ['Hokkaido', 'Tohoku', 'Kanto', 'Tokai-Kinki', 'Shikoku-Kyusyu']
     region_list = ['Tokai-Kinki', 'Shikoku-Kyusyu']
-    region_list_df = pd.read_csv(f'/data0/funato/3_gis_data/{loc}/0_data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
+    region_list_df = pd.read_csv(f'hyper/data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
 elif loc == "US" and ver == 1:
     file_tot_num = 669
     reservoir_size = 200
@@ -111,7 +111,7 @@ elif loc == "GB" and ver == 2:
     region_list = ["Southernmost"]
     region_list_df = pd.read_csv(f'/data0/funato/3_gis_data/GB/0_data/river_basin/dataset_GB/file_num_valid_small.csv')
     
-varssim_dir = f"/data0/funato/2_MERV/{loc}/varssim_nocal/{ver_name}"
+varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
 file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}{buf}"
 print(file_tag)
 
@@ -134,9 +134,9 @@ model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m1
               "m42", "m43", "m44", "m46"]
 
 if BMA_data_exist:
-    bma_weights_df = pd.read_csv(f"/data0/funato/0_out/99_out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
-    bma_predict_cal_df = pd.read_csv(f"/data0/funato/0_out/99_out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
-    bma_predict_eva_df = pd.read_csv(f"/data0/funato/0_out/99_out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
+    bma_weights_df = pd.read_csv(f"hyper/out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
+    bma_predict_cal_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
+    bma_predict_eva_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
 
     bma_weights_df = bma_weights_df.to_dict(orient='index')
     bma_predict_cal_df = bma_predict_cal_df.to_dict(orient='index')
@@ -152,8 +152,8 @@ model = ESN(input_size=input_size,
 
 
 for region in region_list:
-    output_dir = f'/data0/funato/0_out/99_out/{loc}/BC-PCA-lasso_PUB_{reservoir_size}_{ridge_param}/{non_arid_dir}region/{region}'
-    output_fig_dir = f'/data0/funato/0_out/0_fig/{loc}/BC-PCA-lasso_PUB_{reservoir_size}_{ridge_param}/{non_arid_dir}region/{region}'
+    output_dir = f'hyper/out/{loc}/BcReg_{reservoir_size}_{ridge_param}/{non_arid_dir}region/{region}'
+    output_fig_dir = f'/data0/funato/0_out/0_fig/{loc}/BcReg_{reservoir_size}_{ridge_param}/{non_arid_dir}region/{region}'
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(output_dir + '/W_out', exist_ok=True)
     os.makedirs(output_dir + '/PCA', exist_ok=True)
@@ -161,9 +161,9 @@ for region in region_list:
     for subdir in ['train_basin/results', 'train_basin/predict','train_basin/reservoir' ,'test_basin/results', 'test_basin/predict', 'test_basin/reservoir']:
         os.makedirs(os.path.join(output_dir, subdir), exist_ok=True)
 
-    if os.path.exists(output_dir + f'/BC-PCA-lasso_PUB{file_tag}_log.txt'):
-        open(output_dir + f'/BC-PCA-lasso_PUB{file_tag}_log.txt', 'w').close()
-    log_file = open(output_dir + f'/BC-PCA-lasso_PUB{file_tag}_log.txt', 'a')
+    if os.path.exists(output_dir + f'/BcReg{file_tag}_log.txt'):
+        open(output_dir + f'/BcReg{file_tag}_log.txt', 'w').close()
+    log_file = open(output_dir + f'/BcReg{file_tag}_log.txt', 'a')
     log_file.flush()
 
     file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}"
@@ -298,13 +298,13 @@ for region in region_list:
                                                                 
 
             df_results_eva_rev = pd.DataFrame(result_eva_rev)
-            df_results_eva_rev.to_csv(output_dir + f'/{train_test}_basin/results/BC-PCA-lasso_PUB_results{file_tag}_rev_PC{PC_n}_eva.csv', index=False)
+            df_results_eva_rev.to_csv(output_dir + f'/{train_test}_basin/results/BcReg_results{file_tag}_rev_PC{PC_n}_eva.csv', index=False)
 
             reservoir_rev_rows_df = pd.DataFrame(reservoir_rev_rows)
-            reservoir_rev_rows_df.to_csv(output_dir + f"/{train_test}_basin/reservoir/BC-PCA-lasso_PUB_reservoir{file_tag}_rev_PC{PC_n}.csv", index=False, header=False)
+            reservoir_rev_rows_df.to_csv(output_dir + f"/{train_test}_basin/reservoir/BcReg_reservoir{file_tag}_rev_PC{PC_n}.csv", index=False, header=False)
 
-        print(f"BC-PCA-lasso_PUB{file_tag} {PC_n} DONE")
-        log_file.write(f"BC-PCA-lasso_PUB{file_tag} {PC_n} DONE\n")
+        print(f"BcReg{file_tag} {PC_n} DONE")
+        log_file.write(f"BcReg{file_tag} {PC_n} DONE\n")
 
 log_file.write(f"DONE\n")
 log_file.close()
