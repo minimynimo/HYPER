@@ -167,8 +167,8 @@ for file_num in range(1, file_tot_num + 1):
 
     if file_num == 1:
         # Write headers for the first file
-        predict_cal_dates = pd.date_range(start=pd.to_datetime(start_date_cal) + pd.DateOffset(days=1), periods=len(predict_cal))
-        predict_eva_dates = pd.date_range(start=pd.to_datetime(start_date_eva) + pd.DateOffset(days=1), periods=len(predict_eva))
+        predict_cal_dates = pd.date_range(start=pd.to_datetime(start_date_cal) + pd.DateOffset(days=window_size), periods=len(predict_cal))
+        predict_eva_dates = pd.date_range(start=pd.to_datetime(start_date_eva) + pd.DateOffset(days=window_size), periods=len(predict_eva))
 
         date_row_cal = pd.DataFrame([['Date'] + [str(date.date()) for date in predict_cal_dates]])
         date_row_eva = pd.DataFrame([['Date'] + [str(date.date()) for date in predict_eva_dates]])
