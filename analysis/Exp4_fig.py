@@ -17,15 +17,15 @@ ver_name = "ver1_1" if ver == 1 else "ver2_0"
 
 samples = 100
 
-
 ridge_param = 1.0
+
 if loc == "JP":
     file_tot_num = 87
     reservoir_size = 200
     train_basin_int = 15
     test_basins_list = [4,8,11,18,24,28,32,40,45,50,54,59,65,70,77,82,84]
     region_list = ['Hokkaido', 'Tohoku', 'North Central', 'South Central', 'West']
-    region_list_df = pd.read_csv(f'hyper/data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
+    region_list_df = pd.read_csv(f'data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
 
 
 benchmark_list = ["KGE", "NSE", "E1", "VE", "d", "RMSE", "MAE"]
@@ -43,7 +43,7 @@ benchmark_limits = {
 def load_BcProx_data(train_basin_int, benchmark):
     BcProx_sum_data = None
     for sample in range(1, samples + 1):
-        BcProx_data = f'hyper/out/{loc}/BcProx_random_distributed_{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/BcProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
+        BcProx_data = f'out/{loc}/BcProx/random/{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/BcProx_results_Train{train_basin_int}_sample{sample}_eva.csv'
         BcProx_df = pd.read_csv(BcProx_data, index_col=0)
         BcProx_df = BcProx_df.sort_values(by='file_num')
         BcProx_df = pd.DataFrame(BcProx_df.values)
@@ -70,7 +70,7 @@ def load_BcProx_data(train_basin_int, benchmark):
 def load_BcReg_data(pc, train_basin_int, benchmark):
     BcReg_sum_data = None
     for sample in range(1, samples + 1):
-        BcReg_data = f'hyper/out/{loc}/BcReg_random_distributed_{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/sample{sample}/BcReg_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
+        BcReg_data = f'out/{loc}/BcReg/random/{reservoir_size}_{ridge_param}/Train{train_basin_int}/test_basin/results/sample{sample}/BcReg_results_Train{train_basin_int}_sample{sample}_rev_PC{pc}_eva.csv'
         BcReg_df = pd.read_csv(BcReg_data, index_col=0)
         BcReg_df = BcReg_df.sort_values(by='file_num')
         BcReg_df = pd.DataFrame(BcReg_df.values)
@@ -99,7 +99,7 @@ def load_LSTM_PUB_data(train_basin_int, benchmark):
     LSTM_PUB_sum_data = None
     LSTM_PUB_all_samples = []  # Store all samples for percentile calculations
     for sample in range(1, samples + 1):
-        LSTM_PUB_data = f'hyper/out/{loc}/LSTM_PUB_random/ensemble/Train{train_basin_int}/test_basin/results/LSTM_PUB_results_Train{train_basin_int}_sample{sample}_eva.csv'
+        LSTM_PUB_data = f'out/{loc}/LSTM_PUB/random/ensemble/Train{train_basin_int}/test_basin/results/LSTM_PUB_results_Train{train_basin_int}_sample{sample}_eva.csv'
         LSTM_PUB_df = pd.read_csv(LSTM_PUB_data, index_col=0) # the data of the test basin for the sample
         LSTM_PUB_df = LSTM_PUB_df.sort_values(by='file_num')
         LSTM_PUB_df = pd.DataFrame(LSTM_PUB_df.values)
@@ -123,30 +123,30 @@ def load_LSTM_PUB_data(train_basin_int, benchmark):
 
 
 def load_BcProx_region_data(region, benchmark, train_test):
-    BcProx_region_data = pd.read_csv(f'hyper/out/{loc}/BcProx_{reservoir_size}_{ridge_param}/region/{region}/{train_test}_basin/results/BcProx_results_r{reservoir_size}_s1_sr0.4_rr{ridge_param}_eva.csv')
+    BcProx_region_data = pd.read_csv(f'out/{loc}/BcProx/region/{reservoir_size}_{ridge_param}/{region}/{train_test}_basin/results/BcProx_results_r{reservoir_size}_s1_sr0.4_rr{ridge_param}_eva.csv')
     BcProx_region_data = BcProx_region_data.sort_values(by='file_num')
     BcProx_region_data = BcProx_region_data[BcProx_region_data['file_num'].isin(test_basins_list)]
     BcProx_region_data = BcProx_region_data[f'BcProx_r{reservoir_size}_s1_sr0.4_rr{ridge_param}_{benchmark}_eva']
     return BcProx_region_data
 
 def load_BcReg_region_data(pc, region, benchmark, train_test):
-    BcReg_region_data = pd.read_csv(f'hyper/out/{loc}/BcReg_{reservoir_size}_{ridge_param}/region/{region}/{train_test}_basin/results/BcReg_results_r{reservoir_size}_s1_sr0.4_rr{ridge_param}_rev_PC{pc}_eva.csv')
+    BcReg_region_data = pd.read_csv(f'out/{loc}/BcReg/region/{reservoir_size}_{ridge_param}/{region}/{train_test}_basin/results/BcReg_results_r{reservoir_size}_s1_sr0.4_rr{ridge_param}_rev_PC{pc}_eva.csv')
     BcReg_region_data = BcReg_region_data.sort_values(by='file_num')
     BcReg_region_data = BcReg_region_data[BcReg_region_data['file_num'].isin(test_basins_list)]
     BcReg_region_data = BcReg_region_data[f'BcReg_r{reservoir_size}_s1_sr0.4_rr{ridge_param}_{benchmark}_eva']
     return BcReg_region_data
 
 def load_LSTM_PUB_region_data(region, benchmark, train_test):
-    LSTM_PUB_region_data = pd.read_csv(f'hyper/out/{loc}/LSTM_PUB_region/ensemble/{region}/{train_test}_basin/results/LSTM_PUB_results_mean_eva.csv')
+    LSTM_PUB_region_data = pd.read_csv(f'out/{loc}/LSTM_PUB/region/ensemble/{region}/{train_test}_basin/results/LSTM_PUB_results_mean_eva.csv')
     LSTM_PUB_region_data = LSTM_PUB_region_data.sort_values(by='file_num')
     LSTM_PUB_region_data = LSTM_PUB_region_data[LSTM_PUB_region_data['file_num'].isin(test_basins_list)]
     LSTM_PUB_region_data = LSTM_PUB_region_data[f'LSTM_PUB_{benchmark}_eva']
     return LSTM_PUB_region_data
 
 for pc_n in range(1, n_components+1):
-    output_dir = f'hyper/fig/{loc}/benchmark/Spatial_PUB_distributed_regional_{reservoir_size}_{ridge_param}/box/PC{pc_n}'
+    output_dir = f'fig/{loc}/benchmark/Spatial_PUB_regional_{reservoir_size}_{ridge_param}/box/PC{pc_n}'
     if LSTM_data:
-        output_dir = f'hyper/fig/{loc}/benchmark/Spatial_PUB_distributed_regional_{reservoir_size}_{ridge_param}/box_LSTM/PC{pc_n}'
+        output_dir = f'fig/{loc}/benchmark/Spatial_PUB_regional_{reservoir_size}_{ridge_param}/box_LSTM/PC{pc_n}'
     os.makedirs(output_dir, exist_ok=True)
     for benchmark in benchmark_list:
         plot_df_train = pd.DataFrame()

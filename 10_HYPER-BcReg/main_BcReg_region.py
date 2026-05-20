@@ -35,7 +35,6 @@ loc, ver = "JP", 2
 
 input_size = 3
 output_size = 1
-#reservoir_size = 700
 reservoir_size = 200
 spectral_radius = 0.4
 washout = 0
@@ -44,7 +43,7 @@ ridge_param = 1.0
 
 
 ver_name = "ver1_1" if ver == 1 else "ver2_0" 
-attribute_dir = f'hyper/data/river_basin/dataset_{loc}'
+attribute_dir = f'data/river_basin/dataset_{loc}'
 
 if loc == "JP" and ver == 1:
     file_tot_num  = 135
@@ -57,9 +56,9 @@ elif loc == "JP" and ver == 2:
     attribute_values = pd.read_csv(f'{attribute_dir}/basin_data_limited_met&soil&geology&land_{ver_name}.csv', encoding= 'UTF-8') # File_num: 1~135
     columns_drop = ['File_num','grdc_no','river','station','lat_org','long_org','WaterArea','ForestArea','ForestAreaRatio','WaterAreaRatio','land_GolfCourse','land_GolfCourse_Ratio']
     region_list = ['Hokkaido', 'Tohoku', 'North Central', 'South Central', 'West']
-    region_list_df = pd.read_csv(f'hyper/data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
+    region_list_df = pd.read_csv(f'data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
 
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
+varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
 file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}{buf}"
 print(file_tag)
 
@@ -70,16 +69,13 @@ end_date_cal = '2000-12-31'
 start_date_eva = '2001-01-01'
 end_date_eva = '2006-12-31'
 
-model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m10",
-              "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18", "m19", "m20",
-              "m21", "m22", "m23", "m24", "m25", "m26", "m27", "m28", "m29", "m30",
-              "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39",
-              "m42", "m43", "m44", "m46"]
+model_list = [f"m{i:02d}" for i in range(1, 48)]
+
 
 if BMA_data_exist:
-    bma_weights_df = pd.read_csv(f"hyper/out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
-    bma_predict_cal_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
-    bma_predict_eva_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
+    bma_weights_df = pd.read_csv(f"out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
+    bma_predict_cal_df = pd.read_csv(f"out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
+    bma_predict_eva_df = pd.read_csv(f"out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
 
     bma_weights_df = bma_weights_df.to_dict(orient='index')
     bma_predict_cal_df = bma_predict_cal_df.to_dict(orient='index')
@@ -89,14 +85,14 @@ if BMA_data_exist:
 model = ESN(input_size=input_size,
             output_size=output_size,
             reservoir_size=reservoir_size,
-            adjacency_density=0.0006,
+            adjacency_density=0.1,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 
 
 for region in region_list:
-    output_dir = f'hyper/out/{loc}/BcReg_{reservoir_size}_{ridge_param}/region/{region}'
-    output_fig_dir = f'hyper/fig/{loc}/BcReg_{reservoir_size}_{ridge_param}/region/{region}'
+    output_dir = f'out/{loc}/BcReg/region/{reservoir_size}_{ridge_param}/{region}'
+    output_fig_dir = f'fig/{loc}/BcReg/region/{reservoir_size}_{ridge_param}/{region}'
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(output_dir + '/W_out', exist_ok=True)
     os.makedirs(output_dir + '/PCA', exist_ok=True)

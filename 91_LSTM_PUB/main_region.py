@@ -41,10 +41,10 @@ loc, ver = "JP", 2
 ver_name = "ver1_1" if ver == 1 else "ver2_0"
 ##Change datautils.py loc as well
 
-output_dir = f'hyper/out/{loc}/LSTM_PUB_region/data'
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
+output_dir = f'out/{loc}/LSTM_PUB/region/data'
+varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
 
-rundir = f'hyper/out/{loc}/LSTM_PUB_region'
+rundir = f'out/{loc}/LSTM_PUB/region'
 os.makedirs(rundir, exist_ok=True)
 
 ###########
@@ -76,7 +76,7 @@ if loc == "JP":
     attribute_size = 196
     output_mean = np.array([3.8526752089320553])
     test_basins_list = [4,8,11,18,24,28,32,40,45,50,54,59,65,70,77,82,84]
-    region_list_df = pd.read_csv(f'hyper/data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
+    region_list_df = pd.read_csv(f'data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
 file_num_list = list(map(str, range(1, file_tot_num + 1)))
 ###############
 # Prepare run #

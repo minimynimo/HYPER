@@ -25,6 +25,12 @@ main_BcProx_kfold.py: (data-rich scenario) for kfold analysis
 main_BcProx_random.py: (data-scarce scenario) for random selection of gauged basins including cases with limited number of gauged basins  
 main_BcProx_region.py: (remote scenario) for prediction of ungauged basins using regional gauged basins  
 
+## RC (benchmark)
+### 20_RC
+RC model without the use of BMA. 
+
+Run the main_RC.py
+
 ## LSTM (benchmark)
 ### 90_LSTM
 LSTM code for gauged basins, based on Kratzert et al., 2018  
@@ -39,9 +45,9 @@ train_pub_random.sh: (data-scarce scenario) for random selection of gauged basin
 train_pub_region.sh: (remote scenario) for prediction of ungauged basins using regional gauged basins  
 
 ## Analysis
-### RC&BMA
-main_RC.py: for prediction using RC only  
+### BMA & MARRMoT
 main_BMA.py: for prediction using BMA only  
+MARRMoT_model.py: for outputting the results of the uncalibrated MARRMoT models. 
 
 ### figures
 Exp1_fig.py ~ Exp4_fig.py corresponds to the result analysis conducted within the paper.  

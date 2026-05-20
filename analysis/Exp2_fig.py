@@ -8,9 +8,9 @@ fig_size_cdf = (6, 6)
 fs = 17 
 fs_cdf = 13 
 
-BcProx_path_val = "hyper/out/JP/BcProx_kfold_200_0.001/test_basin/results/BcProx_results_r200_sr0.4_rr0.001_eva.csv"
-BcReg_path_val = "hyper/out/JP/BcReg_kfold_200_0.001/test_basin/results/BcReg_results_rev_PC2_eva.csv"
-LSTM_path_val = "hyper/out/JP/LSTM_PUB_kfold/results/LSTM_PUB_results_eva.csv"
+BcProx_path_val = "out/JP/BcProx/kfold/200_1.0/test_basin/results/BcProx_results_r200_sr0.4_rr1.0_eva.csv"
+BcReg_path_val = "out/JP/BcReg/kfold/200_1.0/test_basin/results/BcReg_results_rev_PC2_eva.csv"
+LSTM_path_val = "out/JP/LSTM_PUB/kfold/results/LSTM_PUB_results_eva.csv"
 
 # Load data
 BcProx_data = pd.read_csv(BcProx_path_val)
@@ -18,8 +18,8 @@ BcReg_data = pd.read_csv(BcReg_path_val)
 LSTM_data = pd.read_csv(LSTM_path_val)
 
 benchmark_list = ["KGE", "NSE", "E1", "VE", "d", "RMSE", "MAE"]
-os.makedirs('hyper/fig/JP/benchmark/kfold/box', exist_ok=True)
-os.makedirs('hyper/fig/JP/benchmark/kfold/cdf', exist_ok=True)
+os.makedirs('fig/JP/benchmark/kfold/box', exist_ok=True)
+os.makedirs('fig/JP/benchmark/kfold/cdf', exist_ok=True)
 
 benchmark_limits= {
     'KGE': {'min': -1, 'max': 1},
@@ -33,8 +33,8 @@ benchmark_limits= {
 
 # Extract relevant columns (assuming the evaluation metric is in a column named 'value')
 for benchmark in benchmark_list:
-    BcProx_values = BcProx_data[f'BcProx_r200_sr0.4_rr0.001_{benchmark}_eva']
-    BcReg_values = BcReg_data[f'BcReg_r200_sr0.4_rr0.001_{benchmark}_eva']
+    BcProx_values = BcProx_data[f'BcProx_r200_sr0.4_rr0.1_{benchmark}_eva']
+    BcReg_values = BcReg_data[f'BcReg_r200_sr0.4_rr0.1_{benchmark}_eva']
     LSTM_values = LSTM_data[f'LSTM_PUB_{benchmark}_eva']
 
     # Combine data for box plot
@@ -64,7 +64,7 @@ for benchmark in benchmark_list:
     plt.tight_layout()
 
     # Save or show the plot
-    plt.savefig(f'hyper/fig/JP/benchmark/kfold/box/kfold_results_{benchmark}.png')
+    plt.savefig(f'fig/JP/benchmark/kfold/box/kfold_results_{benchmark}.png')
 
     plt.close()
 
@@ -84,7 +84,7 @@ for benchmark in benchmark_list:
     plt.xlim(benchmark_limits[benchmark]['min'], benchmark_limits[benchmark]['max'])
     plt.ylim(0, 1)
     plt.tight_layout()
-    plt.savefig(f'hyper/fig/JP/benchmark/kfold/cdf/kfold_results_{benchmark}_cdf.png')
+    plt.savefig(f'fig/JP/benchmark/kfold/cdf/kfold_results_{benchmark}_cdf.png')
     plt.close()
     print(f"Processed {benchmark} successfully.")
 

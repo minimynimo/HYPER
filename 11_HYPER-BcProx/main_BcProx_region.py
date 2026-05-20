@@ -32,7 +32,7 @@ start_date_eva = '2001-01-01'
 end_date_eva = '2006-12-31'
 #####################
 ver_name = "ver1_1" if ver == 1 else "ver2_0" 
-attribute_dir = f'hyper/data/river_basin/dataset_{loc}'
+attribute_dir = f'data/river_basin/dataset_{loc}'
 
 if loc == "JP" and ver == 1:
     file_tot_num  = 135
@@ -44,28 +44,23 @@ elif loc == "JP" and ver == 2:
     test_basins_list = [4,8,11,18,24,28,32,40,45,50,54,59,65,70,77,82,84] # chosen sequentially based on the file_num when sorted the river basins by latitude 4,14,24,,,
     columns_drop = ['File_num','grdc_no','river','station','lat_org','long_org']
     region_list = ['Hokkaido', 'Tohoku', 'North Central', 'South Central', 'West']
-    #region_list = ['Hokkaido']
-    region_list_df = pd.read_csv(f'hyper/data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
-    distance_matrix = pd.read_csv('/data0/funato/3_gis_data/JP/0_data/distance_matrix_v2_sorted.csv', index_col=0, header=0)
+    region_list_df = pd.read_csv(f'data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
+    distance_matrix = pd.read_csv('data/distance_matrix_v2_sorted.csv', index_col=0, header=0)
     
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
+varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
 file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}"
 print(file_tag)
 
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
+varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
 
 file_list = list(range(1, file_tot_num+1))
 
-model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m10",
-              "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18", "m19", "m20",
-              "m21", "m22", "m23", "m24", "m25", "m26", "m27", "m28", "m29", "m30",
-              "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39", 
-              "m42", "m43", "m44", "m46"]
+model_list = [f"m{i:02d}" for i in range(1, 48)]
 
 if BMA_data_exist:
-    bma_weights_df = pd.read_csv(f"hyper/out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
-    bma_predict_cal_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
-    bma_predict_eva_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
+    bma_weights_df = pd.read_csv(f"out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
+    bma_predict_cal_df = pd.read_csv(f"out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
+    bma_predict_eva_df = pd.read_csv(f"out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
 
     bma_weights_df = bma_weights_df.to_dict(orient='index')
     bma_predict_cal_df = bma_predict_cal_df.to_dict(orient='index')
@@ -75,11 +70,11 @@ if BMA_data_exist:
 model = ESN(input_size=input_size,
             output_size=output_size,
             reservoir_size=reservoir_size,
-            adjacency_density=0.0006,
+            adjacency_density=0.1,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 
-output_base_dir = f'hyper/out/{loc}/BcProx_{reservoir_size}_{ridge_param}'
+output_base_dir = f'out/{loc}/BcProx/region/{reservoir_size}_{ridge_param}'
 os.makedirs(output_base_dir, exist_ok=True)
 param_file_path = os.path.join(output_base_dir, 'parameters.txt')
 with open(param_file_path, 'w') as param_file:
@@ -90,7 +85,7 @@ with open(param_file_path, 'w') as param_file:
 
 
 for region in region_list:
-    output_dir = f'{output_base_dir}/region/{region}'
+    output_dir = f'{output_base_dir}/{region}'
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     for subdir in ['train_basin/results', 'train_basin/predict',  'train_basin/Wout' ,'test_basin/results', 'test_basin/predict']:
@@ -205,7 +200,7 @@ for region in region_list:
         # reservoir (R, )
 
         #W_out_df = pd.DataFrame(W_out)
-        #W_out_df.to_csv(f"hyper/out/{loc}/BcProx/W_out_file_{file_num}.csv", index=False)
+        #W_out_df.to_csv(f"out/{loc}/BcProx/W_out_file_{file_num}.csv", index=False)
         error_train_cal = model.predict(reservoir, input_train_cal, ptb_func=None, ptb_scale=1.0, nexttime=nexttime, extended_interval=10)
         error_train_eva = model.predict(reservoir, input_train_eva, ptb_func=None, ptb_scale=1.0, nexttime=nexttime, extended_interval=10)
 

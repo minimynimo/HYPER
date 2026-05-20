@@ -86,8 +86,8 @@ def BMK(obs_data,sim_data,benchmark):
 
 
 for train_basin_int in train_basin_int_list:
-    input_dir = f"hyper/out/{loc}/LSTM_PUB_random/ensemble/Train{train_basin_int}/test_basin/predict"
-    output_dir = f'hyper/out/{loc}/LSTM_PUB_random/ensemble/Train{train_basin_int}/test_basin/results' 
+    input_dir = f"hyper/out/{loc}/LSTM_PUB/random/ensemble/Train{train_basin_int}/test_basin/predict"
+    output_dir = f'hyper/out/{loc}/LSTM_PUB/random/ensemble/Train{train_basin_int}/test_basin/results' 
     os.makedirs(output_dir, exist_ok=True)
 
     all_results = []

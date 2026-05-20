@@ -19,8 +19,8 @@ elif loc == "JP" and ver == 2:
     file_tot_num = 87
     test_basins_list = [4,8,11,18,24,28,32,40,45,50,54,59,65,70,77,82,84]
     region_list = ['Hokkaido', 'Tohoku', 'North Central', 'South Central', 'West']
-    region_list_df = pd.read_csv(f'hyper/data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
+    region_list_df = pd.read_csv(f'data/river_basin/dataset_{loc}/pub_region_list_{ver_name}.csv')
+varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
 
 start_date_cal = '1993-01-01'
 end_date_cal = '2000-12-31'
@@ -87,8 +87,8 @@ def BMK(obs_data,sim_data,benchmark):
 
 
 for region in region_list:
-    input_dir = f"hyper/out/{loc}/LSTM_PUB_region/ensemble/{region}/test_basin/predict"
-    output_dir = f'hyper/out/{loc}/LSTM_PUB_region/ensemble/{region}/test_basin/results' 
+    input_dir = f"out/{loc}/LSTM_PUB/region/ensemble/{region}/test_basin/predict"
+    output_dir = f'out/{loc}/LSTM_PUB/region/ensemble/{region}/test_basin/results' 
     os.makedirs(output_dir, exist_ok=True)
 
     all_results = []

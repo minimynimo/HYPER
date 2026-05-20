@@ -1,9 +1,9 @@
 """
 This file is part of the accompanying code to our manuscript:
 
-Kratzert, F., Klotz, D., Herrnegger, M., Sampson, A. K., Hochreiter, S., & Nearing, G. S. ( 2019). 
-Toward improved predictions in ungauged basins: Exploiting the power of machine learning.
-Water Resources Research, 55. https://doi.org/10.1029/2019WR026065 
+Kratzert, F., Klotz, D., Shalev, G., Klambauer, G., Hochreiter, S., Nearing, G., "Benchmarking
+a Catchment-Aware Long Short-Term Memory Network (LSTM) for Large-Scale Hydrological Modeling".
+submitted to Hydrol. Earth Syst. Sci. Discussions (2019)
 
 You should have received a copy of the Apache-2.0 license along with the code. If not,
 see <https://opensource.org/licenses/Apache-2.0>
@@ -18,33 +18,19 @@ import pandas as pd
 from numba import njit
 import os
 
-loc, ver = "JP", 2
-
-
-####
-ver_name = "ver1_1" if ver == 1 else "ver2_0" 
-attribute_dir = f'data/river_basin/dataset_{loc}'
-varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
-
-if loc == "JP":
-    attribute_values = pd.read_csv(f'{attribute_dir}/basin_data_limited_met&soil&geology&land_{ver_name}.csv', encoding= 'UTF-8', index_col=0, header=0)
-    INVALID_ATTR = [
-        'grdc_no','river','station','WaterArea','ForestArea','ForestAreaRatio','WaterAreaRatio','lat_org','long_org', 'land_GolfCourse','land_GolfCourse_Ratio'
-    ]
-
-
-# mean/std calculated over all basins in period 01.01.1993 until 31.12.2006
-if loc == "JP":
-    #JP Goint Precip, Temp, PET
-    SCALER = {
+SCALER = {
+    "JP": {
         'input_means': np.array([4.749130900644258, 9.637227892152021, 1.9068619713226833]),
         'input_stds': np.array([12.247018935981416, 9.750107710636184, 1.3638978668850177]),
         'output_mean': np.array([3.8526752089320553]),
         'output_std': np.array([7.071976225365726])
     }
+}
+
+# varssim_dir = f"/data0/funato/2_MERV/{loc}/varssim_nocal/{ver_name}"
 
 
-def add_basin_attributes(db_path: str = None):
+def add_basin_attributes(db_path: str = None, loc :str=None, ver_name:str = None):
     """Load catchment characteristics from txt files and store them in a sqlite3 table
     
     Parameters
@@ -58,6 +44,12 @@ def add_basin_attributes(db_path: str = None):
     RuntimeError
         If CAMELS attributes folder could not be found.
     """
+
+    attribute_dir = f'data/river_basin/dataset_{loc}'
+    attribute_values = pd.read_csv(f'{attribute_dir}/basin_data_limited_met&soil&geology&land_{ver_name}.csv', encoding= 'UTF-8', index_col=0, header=0)
+    INVALID_ATTR = [
+        'grdc_no','river','station','WaterArea','ForestArea','ForestAreaRatio','WaterAreaRatio','lat_org','long_org', 'land_GolfCourse','land_GolfCourse_Ratio'
+    ]
 
     # df : file_num, attr1, attr2, attr3, ...
     df = attribute_values
@@ -74,8 +66,10 @@ def add_basin_attributes(db_path: str = None):
 
 
 def load_attributes(db_path: str,
-                    drop_lat_lon: bool = False,
-                    keep_features: List = None) -> pd.DataFrame:
+                    basins: List,
+                    drop_lat_lon: bool = True,
+                    keep_features: List = None,
+                    loc: str = "GB") -> pd.DataFrame:
     """Load attributes from database file into DataFrame
 
     Parameters
@@ -95,15 +89,26 @@ def load_attributes(db_path: str,
     pd.DataFrame
         Attributes in a pandas DataFrame. Index is USGS gauge id. Latitude and Longitude are
         transformed to x, y, z on a unit sphere.
-"""
+    """
+    INVALID_ATTR = [
+        'grdc_no','river','station','WaterArea','ForestArea','ForestAreaRatio','WaterAreaRatio','lat_org','long_org', 'land_GolfCourse','land_GolfCourse_Ratio'
+    ]
+
     with sqlite3.connect(db_path) as conn:
         df = pd.read_sql("SELECT * FROM 'basin_attributes'", conn, index_col='File_num')
 
-    #print(f"Loaded basin IDs: {df.index.tolist()}")
+    # Convert basins to int if they're strings (e.g., '001' -> 1)
+    basins_int = [int(b) if isinstance(b, str) else b for b in basins]
+    
+    # drop rows of basins not contained in data set
+    drop_basins = [b for b in df.index if b not in basins_int]
+    df = df.drop(drop_basins, axis=0)
 
-    # drop lat/lon col
+    # drop lat/lon col (only if they exist)
     if drop_lat_lon:
-        df = df.drop(['gauge_lat', 'gauge_lon'], axis=1)
+        cols_to_drop = [c for c in ['gauge_lat', 'gauge_lon'] if c in df.columns]
+        if cols_to_drop:
+            df = df.drop(cols_to_drop, axis=1)
 
     # drop invalid attributes
     if keep_features is not None:
@@ -116,7 +121,7 @@ def load_attributes(db_path: str,
     return df
 
 
-def normalize_features(feature: np.ndarray, variable: str) -> np.ndarray:
+def normalize_features(feature: np.ndarray, variable: str, loc: str = None) -> np.ndarray:
     """Normalize features using global pre-computed statistics.
 
     Parameters
@@ -138,18 +143,20 @@ def normalize_features(feature: np.ndarray, variable: str) -> np.ndarray:
     RuntimeError
         If `variable` is neither 'inputs' nor 'output'
     """
+    if loc not in SCALER:
+        raise RuntimeError(f"Unknown location {loc}")
 
     if variable == 'inputs':
-        feature = (feature - SCALER["input_means"]) / SCALER["input_stds"]
+        feature = (feature - SCALER[loc]["input_means"]) / SCALER[loc]["input_stds"]
     elif variable == 'output':
-        feature = (feature - SCALER["output_mean"]) / SCALER["output_std"]
+        feature = (feature - SCALER[loc]["output_mean"]) / SCALER[loc]["output_std"]
     else:
         raise RuntimeError(f"Unknown variable type {variable}")
 
     return feature
 
 
-def rescale_features(feature: np.ndarray, variable: str) -> np.ndarray:
+def rescale_features(feature: np.ndarray, variable: str, loc: str = None) -> np.ndarray:
     """Rescale features using global pre-computed statistics.
 
     Parameters
@@ -171,10 +178,13 @@ def rescale_features(feature: np.ndarray, variable: str) -> np.ndarray:
     RuntimeError
         If `variable` is neither 'inputs' nor 'output'
     """
+    if loc not in SCALER:
+        raise RuntimeError(f"Unknown location {loc}")
+
     if variable == 'inputs':
-        feature = feature * SCALER["input_stds"] + SCALER["input_means"]
+        feature = feature * SCALER[loc]["input_stds"] + SCALER[loc]["input_means"]
     elif variable == 'output':
-        feature = feature * SCALER["output_std"] + SCALER["output_mean"]
+        feature = feature * SCALER[loc]["output_std"] + SCALER[loc]["output_mean"]
     else:
         raise RuntimeError(f"Unknown variable type {variable}")
 
@@ -215,7 +225,6 @@ def reshape_data(x: np.ndarray, y: np.ndarray, seq_length: int) -> Tuple[np.ndar
     return x_new, y_new
 
 
-
 def file_name(input_num, total_len):
     car_len = len(str(input_num))
     zero_len = total_len - car_len
@@ -238,4 +247,3 @@ def load_data(file_num, varssim_dir, loc):
     df.set_index('Date', inplace=True)
 
     return df
-

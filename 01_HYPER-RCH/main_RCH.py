@@ -22,11 +22,9 @@ output_size = 1
 loc, ver = "JP", 2
 
 reservoir_size = 700
-#reservoir_size = 200
-spectral_radius = 0.4      #0.1
+spectral_radius = 0.9   
 washout = 0
-#ridge_param = 1.0 # 0.001 
-ridge_param = 0.001
+ridge_param = 0.1
 
 file_tag = f"r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}"
 #####################
@@ -38,11 +36,11 @@ if loc == "JP" and ver == 1:
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
 
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/ver2_0"
+varssim_dir = f"data/MERVJP/varssim_nocal/ver2_0"
 
 file_list = list(range(1, file_tot_num+1))
 
-output_dir = f'hyper/out/{loc}/RCH_{reservoir_size}_{ridge_param}'
+output_dir = f'out/{loc}/RCH/{reservoir_size}_{ridge_param}'
 
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(output_dir + '/results', exist_ok=True)
@@ -66,11 +64,8 @@ def file_name(input_num, total_len):
 
 def load_data(file_num):
     df = pd.read_csv(f"{varssim_dir}/varssim{file_name(file_num, 3)}.csv")
-    
-    if loc == "JP":
-        df['Date'] = pd.to_datetime(df[['Year', 'Month', 'Day']])
-    else:
-        df['Date'] = pd.to_datetime(df['Date'])
+
+    df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
     
     # Create a date range that covers the entire period
@@ -115,8 +110,8 @@ def BMK(obs_data,sim_data,benchmark):
 
 #####
 
-BMA_pred_cal = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0)
-BMA_pred_eva = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0)
+BMA_pred_cal = pd.read_csv(f"out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0)
+BMA_pred_eva = pd.read_csv(f"out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0)
 
 results_cal = []
 results_eva = []
@@ -125,7 +120,7 @@ target_analysis = []
 model = ESN(input_size=input_size,
             output_size=output_size,
             reservoir_size=reservoir_size,
-            adjacency_density=0.0006,
+            adjacency_density=0.1,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 

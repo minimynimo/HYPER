@@ -15,11 +15,11 @@ buf = f""
 
 input_size = 3
 output_size = 1
-reservoir_size = 700
-spectral_radius = 0.4
+reservoir_size = 200
+spectral_radius = 0.9
 
 washout = 0
-ridge_param = 0.001
+ridge_param = 0.1
 nexttime= True
 
 #loc, ver = "JP", 1
@@ -33,10 +33,10 @@ ver_name = "ver1_1" if ver == 1 else "ver2_0"
 
 if loc == "JP" and ver == 1:
     file_tot_num  = 135
-    varssim_dir = f"hyper/data/MERVJP/varssim_nocal/ver1_1"
+    varssim_dir = f"data/MERVJP/varssim_nocal/ver1_1"
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
-    varssim_dir = f"hyper/data/MERVJP/varssim_nocal/ver2_0"
+    varssim_dir = f"data/MERVJP/varssim_nocal/ver2_0"
 
 file_list = list(range(1, file_tot_num+1))
 
@@ -45,14 +45,12 @@ end_date_cal = '2000-12-31'
 start_date_eva = '2001-01-01'
 end_date_eva = '2006-12-31'
 
-output_dir = f'hyper/out/{loc}/HYPER_{reservoir_size}_{ridge_param}'
+output_dir = f'out/{loc}/BC/{reservoir_size}_{ridge_param}'
 
 os.makedirs(output_dir, exist_ok=True)
-#os.makedirs(output_dir + '/Win_A', exist_ok=True)
-#os.makedirs(output_dir + '/Wout', exist_ok=True)
 os.makedirs(output_dir + '/results', exist_ok=True)
 os.makedirs(output_dir + '/predict', exist_ok=True)
-#os.makedirs(output_dir + '/reservoir', exist_ok=True)
+#os.makedirs(output_dir+ '/reservoir', exist_ok=True)
 
 param_file_path = os.path.join(output_dir, 'parameters.txt')
 with open(param_file_path, 'w') as param_file:
@@ -71,8 +69,7 @@ def file_name(input_num, total_len):
 def load_data(file_num):
     df = pd.read_csv(f"{varssim_dir}/varssim{file_name(file_num, 3)}.csv")
     
-    df['Date'] = pd.to_datetime(df[['Year', 'Month', 'Day']])
-
+    df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
     
     # Create a date range that covers the entire period
@@ -120,24 +117,15 @@ def BMK(obs_data,sim_data,benchmark):
 model = ESN(input_size=input_size,
             output_size=output_size,
             reservoir_size=reservoir_size,
-            adjacency_density=0.0006,
+            adjacency_density=0.1,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 
-"""
-W_in_vals = model.W_in_val()
-W_in_df = pd.DataFrame(W_in_vals)
-W_in_df.to_csv(output_dir + f"/Win_A/HYPER_Win{file_tag}.csv", mode='a', index=False, header=False)
-
-A_vals = model.A_val()
-A_val_df = pd.DataFrame(A_vals)
-A_val_df.to_csv(output_dir + f"/Win_A/HYPER_A_val{file_tag}.csv", mode = 'a', index=False, header=False)
-"""
 
 
-if os.path.exists(output_dir + f'/HYPER{file_tag}_log.txt'):
-    open(output_dir + f'/HYPER{file_tag}_log.txt', 'w').close()
-log_file = open(output_dir + f'/HYPER{file_tag}_log.txt', 'a')
+if os.path.exists(output_dir + f'/BC{file_tag}_log.txt'):
+    open(output_dir + f'/BC{file_tag}_log.txt', 'w').close()
+log_file = open(output_dir + f'/BC{file_tag}_log.txt', 'a')
 
 results_cal = []
 results_eva = []
@@ -157,8 +145,8 @@ for file_num in file_list:
 
 
     # Load BMA predictions
-    bma_df_cal = pd.read_csv(f'hyper/out/{loc}/BMA/predict/BMA_predict_cal.csv', index_col=0)
-    bma_df_eva = pd.read_csv(f'hyper/out/{loc}/BMA/predict/BMA_predict_eva.csv', index_col=0)
+    bma_df_cal = pd.read_csv(f'out/{loc}/BMA/predict/BMA_predict_cal.csv', index_col=0)
+    bma_df_eva = pd.read_csv(f'out/{loc}/BMA/predict/BMA_predict_eva.csv', index_col=0)
     
     df_cal['Sim flow'] = bma_df_cal.loc[f'file_{file_num}_cal'].values
     df_eva['Sim flow'] = bma_df_eva.loc[f'file_{file_num}_eva'].values
@@ -210,9 +198,9 @@ for file_num in file_list:
     reservoir_row = np.concatenate(([f'file_{file_num}'], reservoir.flatten()))
     reservoir_df = pd.DataFrame([reservoir_row])
     if file_num == 1:
-        reservoir_df.to_csv(output_dir + f"/reservoir/HYPER_reservoir{file_tag}.csv", mode='w', index=False, header=False)
+        reservoir_df.to_csv(output_dir + f"/reservoir/BC_reservoir{file_tag}.csv", mode='w', index=False, header=False)
     else:
-        reservoir_df.to_csv(output_dir + f"/reservoir/HYPER_reservoir{file_tag}.csv", mode='a', index=False, header=False)
+        reservoir_df.to_csv(output_dir + f"/reservoir/BC_reservoir{file_tag}.csv", mode='a', index=False, header=False)
     """
 
     # Wout (1,R)
@@ -222,9 +210,9 @@ for file_num in file_list:
     Wout_row = np.concatenate(([f'file_{file_num}'], Wout.flatten()))
     Wout_df = pd.DataFrame([Wout_row])
     if file_num == 1:
-        Wout_df.to_csv(output_dir + f"/Wout/HYPER_Wout{file_tag}.csv", mode='w', index=False, header=False)
+        Wout_df.to_csv(output_dir + f"/Wout/BC_Wout{file_tag}.csv", mode='w', index=False, header=False)
     else:
-        Wout_df.to_csv(output_dir + f"/Wout/HYPER_Wout{file_tag}.csv", mode='a', index=False, header=False)
+        Wout_df.to_csv(output_dir + f"/Wout/BC_Wout{file_tag}.csv", mode='a', index=False, header=False)
     """
 
     # input_eva <- 0~m-1, knwbsd_sim <- 0~m-1
@@ -258,12 +246,12 @@ for file_num in file_list:
         predict_cal_df = pd.DataFrame([date_row_cal])
         predict_eva_df = pd.DataFrame([date_row_eva])
 
-        predict_cal_df.to_csv(output_dir + f"/predict/HYPER_predict{file_tag}_cal.csv", mode='w', index=False, header=False)
-        predict_eva_df.to_csv(output_dir + f"/predict/HYPER_predict{file_tag}_eva.csv", mode='w', index=False, header=False)
+        predict_cal_df.to_csv(output_dir + f"/predict/BC_predict{file_tag}_cal.csv", mode='w', index=False, header=False)
+        predict_eva_df.to_csv(output_dir + f"/predict/BC_predict{file_tag}_eva.csv", mode='w', index=False, header=False)
 
-    with open(output_dir + f"/predict/HYPER_predict{file_tag}_cal.csv", 'a') as file:
+    with open(output_dir + f"/predict/BC_predict{file_tag}_cal.csv", 'a') as file:
         pd.DataFrame([file_row_cal]).to_csv(file, header=False, index=False)
-    with open(output_dir + f"/predict/HYPER_predict{file_tag}_eva.csv", 'a') as file:
+    with open(output_dir + f"/predict/BC_predict{file_tag}_eva.csv", 'a') as file:
         pd.DataFrame([file_row_eva]).to_csv(file, header=False, index=False)
 
     file_results_cal = {'file_num': file_num}
@@ -272,10 +260,10 @@ for file_num in file_list:
     # Loop over each benchmark and add results to the current file's dictionary
     for benchmark in benchmark_list:
         file_results_cal.update({
-            f'HYPER{file_tag}_{benchmark}_cal': BMK(target_cal, predict_cal, benchmark)
+            f'BC{file_tag}_{benchmark}_cal': BMK(target_cal, predict_cal, benchmark)
         })
         file_results_eva.update({
-            f'HYPER{file_tag}_{benchmark}_eva': BMK(target_eva, predict_eva, benchmark)
+            f'BC{file_tag}_{benchmark}_eva': BMK(target_eva, predict_eva, benchmark)
         })  
     
     results_cal.append(file_results_cal)
@@ -294,11 +282,11 @@ log_file.close()
 
 
 df_results_cal = pd.DataFrame(results_cal)
-df_results_cal.to_csv(output_dir + f'/results/HYPER_results{file_tag}_cal.csv', index=False, header=True)
+df_results_cal.to_csv(output_dir + f'/results/BC_results{file_tag}_cal.csv', index=False, header=True)
 
 df_results_eva = pd.DataFrame(results_eva)
-df_results_eva.to_csv(output_dir + f'/results/HYPER_results{file_tag}_eva.csv', index=False, header=True)
+df_results_eva.to_csv(output_dir + f'/results/BC_results{file_tag}_eva.csv', index=False, header=True)
 
-print(f"HYPER{file_tag} reservoir size {reservoir_size} done")
-print(f"HYPER{file_tag}")
+print(f"BC{file_tag} reservoir size {reservoir_size} done")
+print(f"BC{file_tag}")
 print("DONE")

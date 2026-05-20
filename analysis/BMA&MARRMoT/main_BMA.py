@@ -7,8 +7,6 @@ import pandas as pd
 
 
 #######
-#benchmark =  'NSE'
-#benchmark = 'KGE'
 benchmark_list = ["KGE","NSE","E1","VE", "d","RMSE","MAE"]
 
 #loc, ver = "JP", 1
@@ -21,7 +19,7 @@ if loc == "JP" and ver == 1:
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
 
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
+varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
 
 
 # Define the calibration and evaluation periods
@@ -31,13 +29,10 @@ start_date_eva = '2001-01-01'
 end_date_eva = '2006-12-31'
 
 # List of models
-model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m10",
-              "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18", "m19", "m20",
-              "m21", "m22", "m23", "m24", "m25", "m26", "m27", "m28", "m29", "m30",
-              "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39",
-              "m42", "m43", "m44", "m46"]
+model_list = [f"m{i:02d}" for i in range(1, 48)]
 
-output_dir = f'hyper/out/{loc}/BMA'
+
+output_dir = f'out/{loc}/BMA'
 os.makedirs(output_dir + '/results', exist_ok=True)
 os.makedirs(output_dir + '/predict', exist_ok=True)
 os.makedirs(output_dir + '/weights', exist_ok=True)
@@ -95,9 +90,9 @@ def BMK(obs_data,sim_data,benchmark):
 def load_data(file_num):
     df = pd.read_csv(f"{varssim_dir}/varssim{file_name(file_num, 3)}.csv")
     
-    if loc == "JP":
+    try:
         df['Date'] = pd.to_datetime(df[['Year', 'Month', 'Day']])
-    else:
+    except:
         df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
     
@@ -162,27 +157,15 @@ for file_num in range(1, file_tot_num + 1):  #range(1, file_tot_num + 1):
         pd.DataFrame([weight_row]).to_csv(file, header=False, index=False)
 
     # EVALUATION
-    predict_eva = np.zeros(len(obs_eva))
-    for date in df_eva.index:
-        BMA_day_prediction_eva = 0
-        for i, model in enumerate(model_list):
-            model_eva = df_eva.at[date, model]
-            ave_day_prediction = df_eva.loc[date, model_list].mean()
-            BMA_day_prediction_eva += posterior_cal[i] * model_eva
-        predict_eva[df_eva.index.get_loc(date)] = BMA_day_prediction_eva
-
-    # Calibration testing for analysis
-    predict_cal = np.zeros(len(obs_cal))
-    for date in df_cal.index:
-        BMA_day_prediction_cal = 0
-        for i, model in enumerate(model_list):
-            model_cal = df_cal.at[date, model]
-            if not np.isnan(model_cal):
-                BMA_day_prediction_cal += posterior_cal[i] * model_cal
-        predict_cal[df_cal.index.get_loc(date)] = BMA_day_prediction_cal
-
-    predict_cal[predict_cal < 0] = 0
+    # Vectorized BMA prediction for evaluation period
+    model_eva_matrix = df_eva[model_list].values  # shape: (n_dates, n_models)
+    predict_eva = np.dot(model_eva_matrix, posterior_cal)
     predict_eva[predict_eva < 0] = 0
+
+    # calibration testing
+    model_cal_matrix = df_cal[model_list].values  # shape: (n_dates, n_models)
+    predict_cal = np.dot(model_cal_matrix, posterior_cal)
+    predict_cal[predict_cal < 0] = 0
 
     file_row_cal = [f'file_{file_num}_cal'] + list(predict_cal.flatten())
     file_row_eva = [f'file_{file_num}_eva'] + list(predict_eva.flatten())

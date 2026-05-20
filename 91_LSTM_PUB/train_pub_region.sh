@@ -45,19 +45,19 @@ for region in "${regions[@]}"; do
     echo "Seed: $seed | Core: $core | GPU: $gpu" >> "$output_dir/$log_name"
 
     # Create region train-test splits in the background
-    python3 hyper/91_LSTM_PUB/main_region.py --seed=$seed --region=$region create_region_train_test >> "$output_dir/$log_name" 2>&1 &
+    python3 91_LSTM_PUB/main_region.py --seed=$seed --region=$region create_region_train_test >> "$output_dir/$log_name" 2>&1 &
 
     # Start training in the background
     if [ "$model" = "lstm" ]; then
 
-      outfile="hyper/out/JP/LSTM_PUB_region/reports/pub_lstm.$region.$seed.out"
+      outfile="out/JP/LSTM_PUB/region/reports/pub_lstm.$region.$seed.out"
       start_time=$(date '+%Y-%m-%d %H:%M:%S') # Log start time
       echo "Start Time: $start_time | Seed: $seed | Region: $region" >> "$output_dir/$log_name"
 
-      echo "Running: taskset -c $core python3 hyper/91_LSTM_PUB/main_region.py train --gpu=$gpu --no_static=False --concat_static=True --split_file=hyper/out/$loc/LSTM_PUB_region/data/region_splits_${region}_seed${seed}.p --region=$region" >> "$output_dir/$log_name"
+      echo "Running: taskset -c $core python3 91_LSTM_PUB/main_region.py train --gpu=$gpu --no_static=False --concat_static=True --split_file=out/$loc/LSTM_PUB/region/data/region_splits_${region}_seed${seed}.p --region=$region" >> "$output_dir/$log_name"
 
       # Execute the training command in the background
-      taskset -c $core python3 hyper/91_LSTM_PUB/main_region.py --gpu=$gpu --no_static=False --concat_static=True --split_file="hyper/out/$loc/LSTM_PUB_region/data/region_splits_${region}_seed${seed}.p" --region=$region train > $outfile 2>> "$output_dir/$log_name" &
+      taskset -c $core python3 91_LSTM_PUB/main_region.py --gpu=$gpu --no_static=False --concat_static=True --split_file="out/$loc/LSTM_PUB/region/data/region_splits_${region}_seed${seed}.p" --region=$region train > $outfile 2>> "$output_dir/$log_name" &
 
 
     else

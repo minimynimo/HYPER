@@ -24,11 +24,10 @@ kfold_val = 12
 
 input_size = 3
 output_size = 1
-#reservoir_size = 700
 reservoir_size = 200
 spectral_radius = 0.4
 washout = 0
-ridge_param = 0.001 
+ridge_param = 1.0 
 
 
 start_date_cal = '1993-01-01'
@@ -37,7 +36,6 @@ start_date_eva = '2001-01-01'
 end_date_eva = '2006-12-31'
 
 BMA_data_exist = False
-BC_data_exist = False
 
 random_samples = 100
 random_seed = 42 
@@ -53,27 +51,20 @@ if loc == "JP" and ver == 1:
     step_val_list = [2,4,8,15,20,25,30,40,50,68]
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
-    basin_data_df = pd.read_csv("hyper/data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
-    distance_matrix = pd.read_csv('/data0/funato/3_gis_data/JP/0_data/distance_matrix_v2_sorted.csv', index_col=0, header=0)
+    basin_data_df = pd.read_csv("data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
+    distance_matrix = pd.read_csv('data/distance_matrix_v2_sorted.csv', index_col=0, header=0)
 
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
+varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
 PosTrainBasin = list(range(1, file_tot_num+1))
 
-model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m10",
-              "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18", "m19", "m20",
-              "m21", "m22", "m23", "m24", "m25", "m26", "m27", "m28", "m29", "m30",
-              "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39", 
-              "m42", "m43", "m44", "m46"]
+model_list = [f"m{i:02d}" for i in range(1, 48)]
 
-output_base_dir = f'hyper/out/{loc}/BcProx_kfold_{reservoir_size}_{ridge_param}'
-os.makedirs(output_base_dir, exist_ok=True)
-
-output_dir = f'{output_base_dir}'
+output_dir = f'out/{loc}/BcProx/kfold/{reservoir_size}_{ridge_param}'
 os.makedirs(output_dir, exist_ok=True)
 
-if os.path.exists(output_base_dir + f'/BcProx_random_log.txt'):
-    open(output_base_dir + f'/BcProx_random_log.txt', 'w').close()
-log_file = open(output_base_dir + f'/BcProx_random_log.txt', 'a')
+if os.path.exists(output_dir + f'/BcProx_random_log.txt'):
+    open(output_dir + f'/BcProx_random_log.txt', 'w').close()
+log_file = open(output_dir + f'/BcProx_random_log.txt', 'a')
 
 start_time = datetime.now()
 start_time_st = start_time.strftime("%a %b %d %I:%M:%S %p JST %Y")
@@ -81,9 +72,9 @@ log_file.write(f"start: {start_time_st}\n")
 
 # Load the BMA weights and predictions as dictionaries
 if BMA_data_exist:
-    bma_weights_df = pd.read_csv(f"hyper/out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
-    bma_predict_cal_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
-    bma_predict_eva_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
+    bma_weights_df = pd.read_csv(f"out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
+    bma_predict_cal_df = pd.read_csv(f"out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
+    bma_predict_eva_df = pd.read_csv(f"out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
 
     bma_weights_df = bma_weights_df.to_dict(orient='index')
     bma_predict_cal_df = bma_predict_cal_df.to_dict(orient='index')
@@ -109,7 +100,7 @@ log_file.flush()
 model = ESN(input_size=input_size,
             output_size=output_size,
             reservoir_size=reservoir_size,
-            adjacency_density=0.0006,
+            adjacency_density=0.1,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 
@@ -124,12 +115,8 @@ if not BC_data_exist:
 for subdir in ['test_basin/results', 'test_basin/predict']:
     os.makedirs(os.path.join(output_dir, subdir), exist_ok=True)
 
-if BC_data_exist:
-    W_out_og_rows = pd.read_csv(f'hyper/out/{loc}/BC_{reservoir_size}/Wout/BC_Wout{file_tag}_bma.csv', header=None, index_col=0)
-    W_out_og_rows = W_out_og_rows.reset_index().values.tolist()
-    W_out_weights_og = pd.DataFrame(W_out_og_rows)
-else:
-    result_cal_og, result_eva_og, W_out_weights_og = run_BC(model, PosTrainBasin, bma_df_cal_og, bma_df_eva_og, varssim_dir, start_date_cal, end_date_cal, start_date_eva, end_date_eva, loc, output_base_dir, washout, ridge_param, nexttime, benchmark_list)
+
+result_cal_og, result_eva_og, W_out_weights_og = run_BC(model, PosTrainBasin, bma_df_cal_og, bma_df_eva_og, varssim_dir, start_date_cal, end_date_cal, start_date_eva, end_date_eva, loc, output_dir, washout, ridge_param, nexttime, benchmark_list)
 
 W_out_weights_og = pd.DataFrame(W_out_weights_og)
 

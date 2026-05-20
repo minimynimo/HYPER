@@ -66,7 +66,7 @@ def run_BC(model, file_list, bma_df_cal_og, bma_df_eva_og, varssim_dir, start_da
         # reservoir (R, )
 
         #W_out_df = pd.DataFrame(W_out)
-        #W_out_df.to_csv(f"hyper/out/{loc}/BcProx/W_out_file_{train_file_num}.csv", index=False)
+        #W_out_df.to_csv(f"out/{loc}/BcProx/W_out_file_{train_file_num}.csv", index=False)
         error_train_cal = model.predict(reservoir, input_train_cal, ptb_func=None, ptb_scale=1.0, nexttime=nexttime, extended_interval=10)
         error_train_eva = model.predict(reservoir, input_train_eva, ptb_func=None, ptb_scale=1.0, nexttime=nexttime, extended_interval=10)
 
@@ -124,9 +124,9 @@ def file_name(input_num, total_len):
 def load_data(file_num, varssim_dir, start_date_cal, end_date_eva, loc):
     df = pd.read_csv(f"{varssim_dir}/varssim{file_name(file_num, 3)}.csv")
     
-    if loc == "JP":
+    try:
         df['Date'] = pd.to_datetime(df[['Year', 'Month', 'Day']])
-    else:
+    except:
         df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
     

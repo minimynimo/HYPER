@@ -56,7 +56,7 @@ random_seed = 42
 ####################
 
 ver_name = "ver1_1" if ver == 1 else "ver2_0" 
-attribute_dir = f'hyper/data/river_basin/dataset_{loc}'
+attribute_dir = f'data/river_basin/dataset_{loc}'
 
 if loc == "JP" and ver == 1:
     file_tot_num  = 135
@@ -72,12 +72,12 @@ elif loc == "JP" and ver == 2:
     test_basins_list = [4,8,11,18,24,28,32,40,45,50,54,59,65,70,77,82,84]# chosen sequentially based on the file_num when sorted the river basins by latitude 4,14,24,,,
     train_basin_int_list = [70,50,30,20,15,10,5,3]
 
-    basin_data_df = pd.read_csv("hyper/data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
+    basin_data_df = pd.read_csv("data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
     attribute_values = pd.read_csv(f'{attribute_dir}/basin_data_limited_met&soil&geology&land_{ver_name}.csv', encoding= 'UTF-8') # File_num: 1~135
     columns_drop = ['File_num','grdc_no','river','station','lat_org','long_org','WaterArea','ForestArea','ForestAreaRatio','WaterAreaRatio','land_GolfCourse','land_GolfCourse_Ratio']
 
 
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
+varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
 
 file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}{buf}"
 #####################
@@ -93,21 +93,17 @@ end_date_cal = '2000-12-31'
 start_date_eva = '2001-01-01'
 end_date_eva = '2006-12-31'
 
-model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m10",
-              "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18", "m19", "m20",
-              "m21", "m22", "m23", "m24", "m25", "m26", "m27", "m28", "m29", "m30",
-              "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39",
-              "m42", "m43", "m44", "m46"]
+model_list = [f"m{i:02d}" for i in range(1, 48)]
 
 # 1. Run BC model with 700 reservoirs
 model = ESN(input_size=input_size,
             output_size=output_size,
             reservoir_size=reservoir_size,
-            adjacency_density=0.0006,
+            adjacency_density=0.1,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 
-output_base_dir = f'hyper/out/{loc}/BcReg_random_{reservoir_size}_{ridge_param}'
+output_base_dir = f'out/{loc}/BcReg/random/{reservoir_size}_{ridge_param}'
 os.makedirs(output_base_dir, exist_ok=True)
 if os.path.exists(f'{output_base_dir}/BcReg_random{file_tag}_log.txt'):
     open(f'{output_base_dir}/BcReg_random{file_tag}_log.txt', 'w').close()
@@ -126,9 +122,9 @@ with open(param_file_path, 'w') as param_file:
 #### BC TRAIN ####
 # BMA weights
 if BMA_data_exist:
-    bma_weights_df = pd.read_csv(f"hyper/out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
-    bma_predict_cal_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
-    bma_predict_eva_df = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
+    bma_weights_df = pd.read_csv(f"out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
+    bma_predict_cal_df = pd.read_csv(f"out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
+    bma_predict_eva_df = pd.read_csv(f"out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
 
     bma_weights_df = bma_weights_df.to_dict(orient='index')
     bma_predict_cal_df = bma_predict_cal_df.to_dict(orient='index')
@@ -187,7 +183,7 @@ for train_basin_int in train_basin_int_list:
         log_file.write(f"start: {start_time_st}\n")
         log_file.flush()
 
-        output_fig_dir = f'hyper/fig/{loc}/BcReg_random_{reservoir_size}_{ridge_param}/Train{train_basin_int}/sample{sample}'
+        output_fig_dir = f'fig/{loc}/BcReg/random/{reservoir_size}_{ridge_param}/Train{train_basin_int}/sample{sample}'
         os.makedirs(output_fig_dir, exist_ok=True)
         #for subdir in [f'train_basin/results/sample{sample}', f'train_basin/predict/sample{sample}', f'train_basin/reservoir/sample{sample}']:
         #    os.makedirs(os.path.join(output_dir, subdir), exist_ok=True)

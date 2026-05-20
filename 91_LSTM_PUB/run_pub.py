@@ -31,7 +31,7 @@ experiment="pub_lstm"
 #gpu = sys.argv[2]
 gpu = 1
 
-log_file = f"hyper/out/{loc}/LSTM_PUB/LSTM_PUB_eval_log.txt"
+log_file = f"out/{loc}/LSTM_PUB/LSTM_PUB_eval_log.txt"
 with open(log_file, 'w') as log:
     log.write("Seed,Split,Start Time,End Time,Elapsed Time (seconds)\n")
 
@@ -42,7 +42,7 @@ for seed in range(firstSeed, firstSeed + nSeeds):  # loop through randomized ens
         start_time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
 
         # get the correct run directory by reading the screen report
-        fname = f"hyper/out/{loc}/LSTM_PUB/reports/{experiment}.{seed}.{split}.out"
+        fname = f"out/{loc}/LSTM_PUB/reports/{experiment}.{seed}.{split}.out"
         print(f"Working on seed: {seed} -- file: {fname}")
         f = open(fname)
         lines = f.readlines()
@@ -61,20 +61,20 @@ for seed in range(firstSeed, firstSeed + nSeeds):  # loop through randomized ens
             # Construct the output file and log file paths
             outfile = f"{run_dir}/training_output_seed{seed}_split{split}.log"
             log_name = f"LSTM_PUB_train_log_seed{seed}_split{split}.txt"
-            output_dir = f"hyper/out/{loc}/LSTM_PUB/logs_redo"
+            output_dir = f"out/{loc}/LSTM_PUB/logs_redo"
             os.makedirs(output_dir, exist_ok=True)
 
             # Rerun training command
             rerun_command = (
-                f"python3 hyper/91_LSTM_PUB/main.py --gpu={gpu} "
+                f"python3 91_LSTM_PUB/main.py --gpu={gpu} "
                 f"--no_static=False --concat_static=True --split={split} "
-                f"--split_file=\"hyper/out/{loc}/LSTM_PUB/data/kfold_splits_seed{seed}.p\" train "
+                f"--split_file=\"out/{loc}/LSTM_PUB/data/kfold_splits_seed{seed}.p\" train "
                 f"> {outfile} 2>> \"{output_dir}/{log_name}\" &"
             )
             os.system(rerun_command)
             print(f"Training rerun command executed: {rerun_command}")
 
-        run_command = f"python3 hyper/91_LSTM_PUB/main.py --gpu={gpu} --run_dir={run_dir} --split={split_num} --split_file={split_file} evaluate"
+        run_command = f"python3 91_LSTM_PUB/main.py --gpu={gpu} --run_dir={run_dir} --split={split_num} --split_file={split_file} evaluate"
         os.system(run_command)
 
         # grab the test output file for this split
@@ -172,7 +172,7 @@ with open(log_file, 'a') as log:
 print(f"Ensemble calculation completed. Start: {ensemble_start_time_str}, End: {ensemble_end_time_str}, Elapsed: {ensemble_elapsed_time:.2f} seconds")
 
 # save the ensemble results as CSV files
-output_dir = f"hyper/out/{loc}/LSTM_PUB/ensemble"
+output_dir = f"out/{loc}/LSTM_PUB/ensemble"
 os.makedirs(output_dir, exist_ok=True)
 for basin, df in ens_dict_cal.items():
     fname = f"{output_dir}/{experiment}_{basin}_cal.csv"

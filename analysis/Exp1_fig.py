@@ -23,38 +23,32 @@ LSTM = False
 simple_colors = True
 #simple_colors = False
 
-#RC
-#reservoir_size = 200
-reservoir_size = 700
-ridge_param = 0.001 
-#ridge_param = 1.0
+
+reservoir_size = 200
+ridge_param = 0.1 
 
 ##LSTM
-num_epochs = 200
-hidden_size = 20
+num_epochs = 20
+hidden_size = 128
 learning_rate = 1e-3
-window_size = 365
-batch_size = 512
-dropout_rate = 0.1
+window_size = 180
+batch_size = 256
+dropout_rate = 0.4
 
 fs = 20 
 #########
-file_tag = f'r{reservoir_size}_sr0.4_rr{ridge_param}'
+file_tag = f'r{reservoir_size}_sr0.9_rr{ridge_param}'
 file_tag_LSTM = f'h{hidden_size}_lr{learning_rate}_e{num_epochs}_w{window_size}_b{batch_size}_d{dropout_rate}'
 
 if LSTM:
-    output_dir = f'hyper/fig/{loc}/benchmark/{data_type}_wLSTM_{reservoir_size}_{ridge_param}'
+    output_dir = f'fig/{loc}/benchmark/{data_type}_wLSTM_{reservoir_size}_{ridge_param}'
 else:
-    output_dir = f'hyper/fig/{loc}/benchmark/{data_type}_{reservoir_size}_{ridge_param}'
+    output_dir = f'fig/{loc}/benchmark/{data_type}_{reservoir_size}_{ridge_param}'
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(os.path.join(output_dir, 'box'), exist_ok=True)
 os.makedirs(os.path.join(output_dir, 'point'), exist_ok=True)
 
-model_list = [ "m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m10",
-              "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18", "m19", "m20",
-              "m21", "m22", "m23", "m24", "m25", "m26", "m27", "m28", "m29", "m30",
-              "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39",
-              "m42", "m43", "m44", "m46"]
+model_list = [f"m{i:02d}" for i in range(1, 48)]
 
 benchmark_limit_avebma = {
     'KGE': {'min': -5, 'max': 1},
@@ -214,16 +208,16 @@ for benchmark in benchmark_list:
         global_y_min, global_y_max = float('inf'), float('-inf')
 
 
-        BMA_file_path = f'hyper/out/{loc}/BMA/results/BMA_results_{ce}.csv'
+        BMA_file_path = f'out/{loc}/BMA/results/BMA_results_{ce}.csv'
         if LSTM:
-            LSTM_file_path = f'hyper/out/{loc}/LSTM/results/LSTM_results_{file_tag_LSTM}_{ce}_test.csv'
+            LSTM_file_path = f'out/{loc}/LSTM/results/LSTM_results_{file_tag_LSTM}_{ce}_test.csv'
         if data_type == 'BMA & RC & RCH & BC' or data_type == 'RCH & BC' or data_type == 'RC & RCH & BC' or data_type == 'BMA & RC & BC':
-            RC_file_path = f'hyper/out/{loc}/RC_{reservoir_size}_{ridge_param}/results/RC_results_{file_tag}_{ce}.csv'
-            RCH_file_path = f'hyper/out/{loc}/RCH_{reservoir_size}_{ridge_param}/results/RCH_results_{file_tag}_{ce}.csv'
-            HYPER_file_path = f'hyper/out/{loc}/HYPER_{reservoir_size}_{ridge_param}/results/HYPER_results_{file_tag}_{ce}.csv'
+            RC_file_path = f'out/{loc}/RC/{reservoir_size}_{ridge_param}/results/RC_results_{file_tag}_{ce}.csv'
+            RCH_file_path = f'out/{loc}/RCH/{reservoir_size}_{ridge_param}/results/RCH_results_{file_tag}_{ce}.csv'
+            HYPER_file_path = f'out/{loc}/HYPER/{reservoir_size}_{ridge_param}/results/HYPER_results_{file_tag}_{ce}.csv'
         if data_type == 'RCH & BC':
-            RCH_file_path = f'hyper/out/{loc}/RCH_{reservoir_size}_{ridge_param}/results/RCH_results_{file_tag}_{ce}.csv'
-            HYPER_file_path = f'hyper/out/{loc}/HYPER_{reservoir_size}_{ridge_param}/results/HYPER_results_{file_tag}_{ce}.csv'
+            RCH_file_path = f'out/{loc}/RCH/{reservoir_size}_{ridge_param}/results/RCH_results_{file_tag}_{ce}.csv'
+            HYPER_file_path = f'out/{loc}/HYPER/{reservoir_size}_{ridge_param}/results/HYPER_results_{file_tag}_{ce}.csv'
 
         BMA_df = pd.read_csv(BMA_file_path)
         if LSTM:
@@ -269,7 +263,7 @@ for benchmark in benchmark_list:
                 plot_df_cal['BC'] = HYPER_data
 
             for model_name in model_list:
-                MARRMoT_file_path = f'hyper/out/{loc}/MARRMoT_nocal/{model_name}_results_{ce}.csv'
+                MARRMoT_file_path = f'out/{loc}/MARRMoT_nocal/{model_name}_results_{ce}.csv'
                 MARRMoT_df = pd.read_csv(MARRMoT_file_path)
                 MARRMoT_column = f'{model_name}_{benchmark}_{ce}'
                 MARRMoT_data = MARRMoT_df[MARRMoT_column]
@@ -295,7 +289,7 @@ for benchmark in benchmark_list:
                 plot_df_eva['BC'] = HYPER_data
 
             for model_name in model_list:
-                MARRMoT_file_path = f'hyper/out/{loc}/MARRMoT_nocal/{model_name}_results_{ce}.csv'
+                MARRMoT_file_path = f'out/{loc}/MARRMoT_nocal/{model_name}_results_{ce}.csv'
                 MARRMoT_df = pd.read_csv(MARRMoT_file_path)
                 MARRMoT_column = f'{model_name}_{benchmark}_{ce}'
                 MARRMoT_data = MARRMoT_df[MARRMoT_column]
@@ -336,19 +330,15 @@ for benchmark in benchmark_list:
         ax.set_ylim(benchmark_limits[benchmark]['min'], benchmark_limits[benchmark]['max'])
 
     fig_box.tight_layout()
-    #fig_line.tight_layout()
     fig_point.tight_layout()
 
     box_output_path = os.path.join(output_dir, f'box/{benchmark}_boxplot{buf}_{ce}.jpg')
-    #line_output_path = os.path.join(output_dir, f'line/{benchmark}_lineplot{buf}_{ce}.jpg')
     point_output_path = os.path.join(output_dir, f'point/{benchmark}_pointplot{buf}_{ce}.jpg')
 
     fig_box.savefig(box_output_path)
-    #fig_line.savefig(line_output_path)
     fig_point.savefig(point_output_path)
 
     plt.close(fig_box)
-    #plt.close(fig_line)
     plt.close(fig_point)
 
     print(box_output_path)

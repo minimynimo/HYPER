@@ -8,9 +8,9 @@ benchmark_list = ["KGE","NSE","E1", "VE", "d","RMSE","MAE"]
 loc, ver = "JP", 2
 
 
-output_dir = f'hyper/out/{loc}/LSTM_PUB/results/'
+output_dir = f'out/{loc}/LSTM_PUB/results/'
 
-input_dir = f"hyper/out/JP/LSTM_PUB/ensemble"
+input_dir = f"out/JP/LSTM_PUB/ensemble"
 
 ver_name = "ver1_1" if ver == 1 else "ver2_0"   
 
@@ -19,7 +19,7 @@ if loc == "JP" and ver == 1:
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
 
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
+varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
 
 start_date_cal = '1993-01-01'
 end_date_cal = '2000-12-31'

@@ -41,10 +41,10 @@ ver_name = "ver1_1" if ver == 1 else "ver2_0"
 ##Change datautils.py loc as well
 
 
-output_dir = f'hyper/out/{loc}/LSTM_PUB_kfold/data'
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
+output_dir = f'out/{loc}/LSTM_PUB/kfold/data'
+varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
 
-rundir = f'hyper/out/{loc}/LSTM_PUB_kfold'
+rundir = f'out/{loc}/LSTM_PUB/kfold'
 os.makedirs(rundir, exist_ok=True)
 
 ###########

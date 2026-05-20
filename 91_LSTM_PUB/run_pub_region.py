@@ -35,12 +35,12 @@ gpu = 1
 
 seed_list = range(firstSeed, firstSeed + nSeeds)  # loop through randomized ensemble
 
-log_file = f"hyper/out/{loc}/LSTM_PUB_region/LSTM_PUB_eval_log.txt"
+log_file = f"out/{loc}/LSTM_PUB/region/LSTM_PUB_eval_log.txt"
 with open(log_file, 'w') as log:
     log.write("Seed,Start Time,End Time,Elapsed Time (seconds)\n")
 
 # Create a log file for evaluation
-log_dir = f"hyper/out/{loc}/LSTM_PUB_region/logs"
+log_dir = f"out/{loc}/LSTM_PUB/region/logs"
 os.makedirs(log_dir, exist_ok=True)
 eval_log_file = f"{log_dir}/lstm_pub_eval_{region}.log"
 with open(eval_log_file, 'w') as eval_log:
@@ -57,7 +57,7 @@ for seed in seed_list:  # loop through randomized ensemble
     start_time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
 
     # get the correct run directory by reading the screen report
-    fname = f"hyper/out/{loc}/LSTM_PUB_region/reports/{experiment}.{region}.{seed}.out"
+    fname = f"out/{loc}/LSTM_PUB/region/reports/{experiment}.{region}.{seed}.out"
     with open(eval_log_file, 'a') as eval_log:
         eval_log.write(f"Working on seed: {seed} -- file: {fname}\n")
         eval_log.flush()
@@ -76,7 +76,7 @@ for seed in seed_list:  # loop through randomized ensemble
             eval_log.flush()
         # skip this iteration for both seed and ensemble calculations
 
-    run_command = f"python3 hyper/91_LSTM_PUB/main_region.py --gpu={gpu} --run_dir={run_dir} --split_file={split_file} --region={region}  evaluate"
+    run_command = f"python3 91_LSTM_PUB/main_region.py --gpu={gpu} --run_dir={run_dir} --split_file={split_file} --region={region}  evaluate"
     os.system(run_command)
 
     # grab the test output file for this split
@@ -121,7 +121,7 @@ for seed in seed_list:  # loop through randomized ensemble
         # rename the columns to include the seed number
         seed_dict_cal[basin].rename(columns={'qsim': f"qsim_{seed}"}, inplace=True)
         # append to CSV for calibration
-        output_dir = f"hyper/out/{loc}/LSTM_PUB_region/ensemble/{region}/test_basin/predict"
+        output_dir = f"out/{loc}/LSTM_PUB/region/ensemble/{region}/test_basin/predict"
         os.makedirs(output_dir, exist_ok=True)
         fname_cal = f"{output_dir}/{experiment}_{basin}_cal.csv"
         if not os.path.exists(fname_cal):

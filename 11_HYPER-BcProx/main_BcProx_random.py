@@ -21,10 +21,9 @@ nexttime = True
 
 input_size = 3
 output_size = 1
-#reservoir_size = 700
 spectral_radius = 0.4
 washout = 0
-ridge_param = 1.0 #0.001 
+ridge_param = 1.0
 
 start_date_cal = '1993-01-01'
 end_date_cal = '2000-12-31'
@@ -33,17 +32,16 @@ end_date_eva = '2006-12-31'
 
 BMA_data_exist = True
 
-random_samples = 100 #00
+random_samples = 100
 random_seed = 42 
 
 #####################
 ver_name = "ver1_1" if ver == 1 else "ver2_0"
-attribute_dir = f'hyper/data/river_basin/dataset_{loc}'
+attribute_dir = f'data/river_basin/dataset_{loc}'
 
 if loc == "JP" and ver == 1:
     file_tot_num  = 135
     start_val_list = [68]
-    #step_val_list = list(range(2,69))
     step_val_list = [2,4,8,15,20,25,30,40,50,68]
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
@@ -52,11 +50,11 @@ elif loc == "JP" and ver == 2:
     #test_basins_list = [4,11,24,34,40,45,70,77,84] # chosen sequentially based on the file_num when sorted the river basins by latitude 4,14,24,,,
     test_basins_list = [4,8,11,18,24,28,32,40,45,50,54,59,65,70,77,82,84]
     train_basin_int_list = [70,50,30,20,15,10,5,3]
-    basin_data_df = pd.read_csv("hyper/data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
-    distance_matrix = pd.read_csv('/data0/funato/3_gis_data/JP/0_data/distance_matrix_v2_sorted.csv', index_col=0, header=0)
+    basin_data_df = pd.read_csv("data/river_basin/dataset_JP/pub_region_list_ver2_0.csv")
+    distance_matrix = pd.read_csv('data/distance_matrix_v2_sorted.csv', index_col=0, header=0)
     columns_drop = ['File_num','grdc_no','river','station','lat_org','long_org']
 
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
+varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
 file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}"
 
 file_list = list(range(1, file_tot_num+1))
@@ -64,17 +62,14 @@ file_list = list(range(1, file_tot_num+1))
 # possible training basins to select the training basins from
 PosTrainBasin = [i for i in file_list if i not in test_basins_list]
 
-model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m10",
-              "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18", "m19", "m20",
-              "m21", "m22", "m23", "m24", "m25", "m26", "m27", "m28", "m29", "m30",
-              "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39", 
-              "m42", "m43", "m44", "m46"]
+model_list = [f"m{i:02d}" for i in range(1, 48)]
+
 
 # Load the BMA weights and predictions as dictionaries
 if BMA_data_exist:
-    bma_weights_df = pd.read_csv(f"hyper/out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
-    bma_df_cal_og = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
-    bma_df_eva_og = pd.read_csv(f"hyper/out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
+    bma_weights_df = pd.read_csv(f"out/{loc}/BMA/weights/BMA_weights.csv", index_col=0, header=0)
+    bma_df_cal_og = pd.read_csv(f"out/{loc}/BMA/predict/BMA_predict_cal.csv", index_col=0, header=0)
+    bma_df_eva_og = pd.read_csv(f"out/{loc}/BMA/predict/BMA_predict_eva.csv", index_col=0, header=0)
 
     bma_weights_df = bma_weights_df.to_dict(orient='index')
     bma_df_cal_og = bma_df_cal_og.to_dict(orient='index')
@@ -93,11 +88,11 @@ bma_df_eva_og = pd.DataFrame(bma_df_eva_og)
 model = ESN(input_size=input_size,
             output_size=output_size,
             reservoir_size=reservoir_size,
-            adjacency_density=0.0006,
+            adjacency_density=0.1,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 
-output_base_dir = f'hyper/out/{loc}/BcProx_random_{reservoir_size}_{ridge_param}'
+output_base_dir = f'out/{loc}/BcProx/random/{reservoir_size}_{ridge_param}'
 os.makedirs(output_base_dir, exist_ok=True)
 if os.path.exists(output_base_dir + f'/BcProx_random_log.txt'):
     open(output_base_dir + f'/BcProx_random_log.txt', 'w').close()

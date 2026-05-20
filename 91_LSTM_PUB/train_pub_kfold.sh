@@ -29,7 +29,7 @@ mkdir -p "$output_dir" # Create logs directory if it doesn't exist
 
 for (( seed = $firstseed ; seed < $((nseeds+$firstseed)) ; seed++ )); do
 
-  python3 hyper/91_LSTM_PUB/main_kfold.py --n_splits=$nsplits --seed=$seed create_splits >> "$output_dir/$log_name" 2>&1
+  python3 91_LSTM_PUB/main_kfold.py --n_splits=$nsplits --seed=$seed create_splits >> "$output_dir/$log_name" 2>&1
   wait
 
   for ((split = 0 ; split < $nsplits ; split++ )); do  
@@ -44,13 +44,13 @@ for (( seed = $firstseed ; seed < $((nseeds+$firstseed)) ; seed++ )); do
 
     if [ "$model" = "lstm" ]; then
 
-      outfile="hyper/out/JP/LSTM_PUB_kfold/reports/pub_lstm.$seed.$split.out"
+      outfile="out/JP/LSTM_PUB/kfold/reports/pub_lstm.$seed.$split.out"
       start_time=$(date '+%Y-%m-%d %H:%M:%S') # Log start time
       echo "Start Time: $start_time | Seed: $seed | Split: $split" >> "$output_dir/$log_name"
 
-      echo "Running: taskset -c $core python3 hyper/91_LSTM_PUB/main_kfold.py train --gpu=$gpu --no_static=False --concat_static=True --split=$split --split_file=hyper/out/$loc/LSTM_PUB_kfold/data/kfold_splits_seed$seed.p" >> "$output_dir/$log_name"
+      echo "Running: taskset -c $core python3 91_LSTM_PUB/main_kfold.py train --gpu=$gpu --no_static=False --concat_static=True --split=$split --split_file=out/$loc/LSTM_PUB/kfold/data/kfold_splits_seed$seed.p" >> "$output_dir/$log_name"
 
-      taskset -c $core python3 hyper/91_LSTM_PUB/main_kfold.py --gpu=$gpu --no_static=False --concat_static=True --split=$split --split_file="hyper/out/$loc/LSTM_PUB_kfold/data/kfold_splits_seed$seed.p" train > $outfile 2>> "$output_dir/$log_name" &
+      taskset -c $core python3 91_LSTM_PUB/main_kfold.py --gpu=$gpu --no_static=False --concat_static=True --split=$split --split_file="out/$loc/LSTM_PUB/kfold/data/kfold_splits_seed$seed.p" train > $outfile 2>> "$output_dir/$log_name" &
 
       wait # Ensure the process completes before logging end time
       end_time=$(date '+%Y-%m-%d %H:%M:%S') # Log end time

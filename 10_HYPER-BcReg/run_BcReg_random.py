@@ -316,9 +316,9 @@ def file_name(input_num, total_len):
 def load_data(file_num, varssim_dir, loc, start_date, end_date):
     df = pd.read_csv(f"{varssim_dir}/varssim{file_name(file_num, 3)}.csv")
     
-    if loc == "JP":
+    try:
         df['Date'] = pd.to_datetime(df[['Year', 'Month', 'Day']])
-    else:
+    except:
         df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
     

@@ -5,7 +5,6 @@ import os
 import numpy as np
 import pandas as pd
 from numpy.ma import masked_array
-from progressbar import ProgressBar
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -27,7 +26,7 @@ if loc == "JP" and ver == 1:
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
 
-varssim_dir = f"hyper/data/MERVJP/varssim{nocal_tag}/{ver_name}"
+varssim_dir = f"data/MERVJP/varssim{nocal_tag}/{ver_name}"
 
 # Define the calibration and evaluation periods
 start_date_cal = '1993-01-01'
@@ -36,16 +35,11 @@ start_date_eva = '2001-01-01'
 end_date_eva = '2006-12-31'
 
 
-model_list = ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m10",
-            "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18", "m19", "m20",
-            "m21", "m22", "m23", "m24", "m25", "m26", "m27", "m28", "m29", "m30",
-            "m31", "m32", "m33", "m34", "m35", "m36", "m37", "m38", "m39",
-            "m42", "m43", "m44", "m46"]
+model_list = [f"m{i:02d}" for i in range(1, 48)]
 
-#model_list = "m07"
 buf = ""
 
-output_dir = f'hyper/out/{loc}/MARRMoT{nocal_tag}/'
+output_dir = f'out/{loc}/MARRMoT{nocal_tag}/'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
     
@@ -59,9 +53,9 @@ def file_name(input_num, total_len):
 def load_data(file_num):
     df = pd.read_csv(f"{varssim_dir}/varssim{file_name(file_num, 3)}.csv")
     
-    if loc == "JP":
+    try:
         df['Date'] = pd.to_datetime(df[['Year', 'Month', 'Day']])
-    else:
+    except:
         df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
     
@@ -113,8 +107,6 @@ def BMK(obs_data, sim_data, benchmark):
         return np.mean(np.abs(obs_data - sim_data))
 
 
-p = ProgressBar(0, (file_tot_num+1)*len(model_list))
-i = 0
 # Run BMA for each dataset
 for model_name in model_list:
     # no need for predict. only need results
@@ -122,8 +114,6 @@ for model_name in model_list:
     results_eva = []
 
     for file_num in range(1, file_tot_num+1):
-        i += 1
-        p.update(i)
         # Load the data
         df = load_data(file_num)
 
@@ -162,6 +152,5 @@ for model_name in model_list:
 
     df_results_eva = pd.DataFrame(results_eva)
     df_results_eva.to_csv(output_dir + f'/{model_name}_results_eva.csv', index=False)
-p.finish()
 
 print("DONE")

@@ -1,9 +1,10 @@
 # Description: Main script for running the ESN model on multiple files.
 import matplotlib
 matplotlib.use('Agg')
-from esn_RC import ESN
+from esn import ESN
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 from numpy.ma import masked_array
 from datetime import datetime
 import os
@@ -11,23 +12,26 @@ import os
 #####################
 benchmark_list = ["KGE","NSE","E1","VE", "d","RMSE","MAE"]
 
+spin = 1
+
 nexttime = True
+arid_files = False
 
 buf = ""
 
 input_size = 3
 output_size = 1
-reservoir_size = 700
-#reservoir_size = 200
-spectral_radius = 0.4
+reservoir_size = 200
+spectral_radius = 0.9
 washout = 0
-#ridge_param = 1.0  
-ridge_param = 0.001 
+ridge_param = 0.1 
 
-#loc, ver = "JP", 1
 loc, ver = "JP", 2
 
-file_tag = f"_r{reservoir_size}_sr{spectral_radius}_rr{ridge_param}"
+if loc != "US":
+    arid_files = False
+
+file_tag = f"_r{reservoir_size}_s{spin}_sr{spectral_radius}_rr{ridge_param}"
 #####################
 print(file_tag)
 
@@ -36,7 +40,7 @@ if loc == "JP" and ver == 1:
     file_tot_num  = 135
 elif loc == "JP" and ver == 2:
     file_tot_num = 87
-varssim_dir = f"hyper/data/MERVJP/varssim_nocal/{ver_name}"
+varssim_dir = f"data/MERVJP/varssim_nocal/{ver_name}"
 
 file_list = list(range(1, file_tot_num+1))
 
@@ -45,12 +49,13 @@ end_date_cal = '2000-12-31'
 start_date_eva = '2001-01-01'
 end_date_eva = '2006-12-31'
 
-output_dir = f'hyper/out/{loc}/RC_{reservoir_size}_{ridge_param}'
-
+output_dir = f'out/{loc}/RC/{reservoir_size}_{ridge_param}'
 os.makedirs(output_dir + '/results', exist_ok=True)
 os.makedirs(output_dir + '/predict', exist_ok=True)
 os.makedirs(output_dir + '/Wout', exist_ok=True)
 
+# List of models
+model_list = [f"m{i:02d}" for i in range(1, 48)]
 
 def file_name(input_num, total_len):
     car_len = len(str(input_num))
@@ -60,8 +65,11 @@ def file_name(input_num, total_len):
 def load_data(file_num):
     df = pd.read_csv(f"{varssim_dir}/varssim{file_name(file_num, 3)}.csv")
     
-    if loc == "JP":
+    try:
         df['Date'] = pd.to_datetime(df[['Year', 'Month', 'Day']])
+    except:
+        df['Date'] = pd.to_datetime(df['Date'])
+
     df.set_index('Date', inplace=True)
     
     # Create a date range that covers the entire period
@@ -70,47 +78,79 @@ def load_data(file_num):
     # Reindex the DataFrame to this date range, filling missing values with NaNs
     df = df.reindex(full_date_range)
     
+    # Normalize input features (Precip, PET, Temp)
+    if 'Precip' in df.columns and 'PET' in df.columns and 'Temp' in df.columns:
+        scaler = StandardScaler()
+        input_cols = ['Precip', 'PET', 'Temp']
+        # Only fit on non-NaN values
+        valid_data = df[input_cols].dropna()
+        if len(valid_data) > 0:
+            scaler.fit(valid_data)
+            df[input_cols] = scaler.transform(df[input_cols])
+    
     return df
 
-def BMK(obs_data,sim_data,benchmark):
-    """
-    obs_data = np.array(obs_data)
-    sim_data = np.array(sim_data)
-    
+def BMK(obs_data, sim_data, benchmark):
+    obs_data = np.array(obs_data).flatten()
+    sim_data = np.array(sim_data).flatten()
+
     mask = ~np.isnan(obs_data) & ~np.isnan(sim_data)
     obs_data = obs_data[mask]
     sim_data = sim_data[mask]
-    """
-    
-    if benchmark == "NSE":
-        obs_ave = np.mean(obs_data)
-        return 1 - (np.sum(np.square(obs_data - sim_data)) / np.sum(np.square(obs_data - obs_ave)))
-    
-    elif benchmark == "KGE":
+
+    if benchmark == "KGE":
+        # Handle edge cases
+        if np.std(obs_data) == 0 or np.std(sim_data) == 0:
+            return np.nan
+        if np.mean(obs_data) == 0:
+            return np.nan
+            
         r = np.corrcoef(obs_data, sim_data)[0, 1]
         obs_ave = np.mean(obs_data)
         sim_ave = np.mean(sim_data)
         obs_std = np.std(obs_data)
         sim_std = np.std(sim_data)
-        if obs_std == 0:
-            obs_std = 1e-6
-        if obs_ave == 0:
-            obs_ave = 1e-6
-        return 1 - np.sqrt((r - 1)**2 + ((sim_std / obs_std) - 1)**2 + ((sim_ave / obs_ave) - 1)**2)
-
+        return 1 - np.sqrt((r - 1)**2 + ((sim_std / obs_std) - 1)**2 + ((sim_ave / obs_ave) - 1)**2) 
+    
+    elif benchmark == "NSE":
+        obs_ave = np.mean(obs_data)
+        denom = np.sum(np.square(obs_data - obs_ave))
+        if denom == 0:
+            return np.nan
+        return 1 - (np.sum(np.square(obs_data - sim_data)) / denom)
+    
+    elif benchmark == "logNSE":
+        temp_obs_data = np.where((obs_data <= 0) | np.isnan(obs_data), 1e-6, obs_data)
+        temp_sim_data = np.where((sim_data <= 0) | np.isnan(sim_data), 1e-6, sim_data)
+        obs_ave = np.mean(temp_obs_data)
+        numer = np.sum((np.log(temp_sim_data) - np.log(temp_obs_data))**2)
+        denom = np.sum((np.log(temp_obs_data) - np.log(obs_ave))**2) + 1e-8
+        return 1 - numer / denom
     
     elif benchmark == "E1":
         obs_ave = np.mean(obs_data)
-        return 1 - (np.sum(np.abs(obs_data - sim_data)) / np.sum(np.abs(obs_data - obs_ave)))
-
+        denom = np.sum(np.abs(obs_data - obs_ave))
+        if denom == 0:
+            return np.nan
+        return 1 - (np.sum(np.abs(obs_data - sim_data)) / denom)
+    
+    elif benchmark == "Erel":
+        obs_ave = np.mean(obs_data)
+        temp_obs_data = np.where(obs_data == 0, 1e-6, obs_data)
+        numer = np.sum(np.square((temp_obs_data - sim_data) / temp_obs_data))
+        denom = np.sum(np.square((obs_data - obs_ave) / obs_ave)) + 1e-8
+        return 1 - numer / denom
     
     elif benchmark == "VE":
-        return 1 - np.sum(np.abs(obs_data - sim_data)) / np.sum(obs_data)
+        obs_sum = np.sum(obs_data)
+        if obs_sum == 0:
+            return np.nan
+        return 1 - np.sum(np.abs(obs_data - sim_data)) / obs_sum
     
     elif benchmark == "d":
         obs_ave = np.mean(obs_data)
         numer = np.sum(np.square(obs_data - sim_data))
-        denom = np.sum(np.square(np.abs(sim_data - obs_ave) + np.abs(obs_data - obs_ave)))
+        denom = np.sum(np.square(np.abs(sim_data - obs_ave) + np.abs(obs_data - obs_ave))) + 1e-8
         return 1 - numer / denom
     
     elif benchmark == "RMSE":
@@ -129,7 +169,7 @@ results_eva = []
 model = ESN(input_size=input_size,
             output_size=output_size,
             reservoir_size=reservoir_size,
-            adjacency_density=0.0006,
+            adjacency_density=0.1,
             spectral_radius=spectral_radius,
             input_scale=0.5)
 
@@ -147,18 +187,11 @@ for file_num in file_list:
 
     ### INPUT DATA ###
     df = load_data(file_num)
+    #df = df[['Precip', 'Obs flow'] + model_list]
 
     df_cal = df[start_date_cal:end_date_cal].copy()  # Use copy to avoid SettingWithCopyWarning
     df_eva = df[start_date_eva:end_date_eva].copy()
 
-    # Observations
-    #obs_cal = masked_array(df_cal['Obs flow'].values, mask=(df_cal['Obs flow'].values == -999))
-    #obs_eva = masked_array(df_eva['Obs flow'].values, mask=(df_eva['Obs flow'].values == -999))
-    # Remove NaNs from observations and corresponding simulations
-    #obs_cal = obs_cal[~np.isnan(obs_cal)]
-    #df_cal = df_cal.dropna(subset=['Obs flow'])
-    #obs_eva = obs_eva[~np.isnan(obs_eva)]
-    #df_eva = df_eva.dropna(subset(['Obs flow'])
 
     # For each timestep, Precip,Temp,PET,Obs flow
     input_cal = np.hstack([
@@ -186,18 +219,7 @@ for file_num in file_list:
     #print("target_cal",target_cal.shape) # 2898,
     #print("target_eva",target_eva.shape) # 1089,
 
-    ##########!!!!
-    #data = readBinary(path, precision=4, nsteps=total_length*time_thinning_step, npoints=output_size*space_thinning_step)
-    #data = data.getData(step=time_thinning_step).T[::space_thinning_step, :]
-
-    # CALIBRATION
-    # precip_cal: USED TO TRAIN THE ESN , EX; PRECIPITATION, TEMPERATURE, OTHER INPUTS
-    # obs_cal:  EXPECTED OUTPUT OF THE TRAIN DATA, SHIFTED ONE TIMESTEP OF TRAIN DATA TO PREDICT,EX: OBSERVED FLOW
-    # EVALUATION
-    # precip_eva:  INPUT OF THE ESN , EX; PRECIPITATION, TEMPERATURE, OTHER INPUTS
-    # obs_eva: EVALUATE THE TEST OBSERVED, SHIFTED ONE TIMESTEP OF TRAIN DATA TO PREDICT,EX: OBSERVED FLOW
-
-    W_out, reservoir = model.train(input_cal, target_data=target_cal, washout=washout, ridge_param=ridge_param)
+    W_out, reservoir = model.train(input_cal, target_data=target_cal, washout=washout, ridge_param=ridge_param, spinup = spin)
 
     # W_out (1,R)
     # reservoir (R, )
@@ -216,8 +238,8 @@ for file_num in file_list:
     #print(predict_eva.shape) # 1,1094
     print(BMK(target_cal.T,predict_cal,"KGE"), BMK(target_eva.T, predict_eva,"KGE"))
     
-    file_row_cal = [f'file_{file_num}_cal'] + list(predict_cal.flatten())
-    file_row_eva = [f'file_{file_num}_eva'] + list(predict_eva.flatten())
+    file_row_cal = [f'file_{file_num}'] + list(predict_cal.flatten())
+    file_row_eva = [f'file_{file_num}'] + list(predict_eva.flatten())
 
     if file_num == 1:
         predict_cal_dates = pd.date_range(start=pd.to_datetime(start_date_cal) + pd.DateOffset(days=1), periods=len(predict_cal[0]))
