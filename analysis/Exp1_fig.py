@@ -1,3 +1,9 @@
+"""
+This code is associated to the following paper:
+
+Funato, M., Sawada, Y., "Multi-Model Ensemble and Reservoir Computing for River Discharge Prediction in Ungauged Basins".
+currently under submission
+"""
 # Creates box plots, line plots, and point plots for each benchmark type (KGE, NSE, logNSE, E1, Erel, VE, d, RMSE, MAE) for both calibration and evaluation periods.
 # use for BMA, RC, RCH-bma, RCH-bc, and bias correction
 import matplotlib

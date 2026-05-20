@@ -1,3 +1,9 @@
+"""
+This code is associated to the following paper:
+
+Funato, M., Sawada, Y., "Multi-Model Ensemble and Reservoir Computing for River Discharge Prediction in Ungauged Basins".
+currently under submission
+"""
 # Calculates the performance of each model in the ensemble using the benchmarks NSE, KGE, logNSE, E1, Erel, VE, d, RMSE, and MAE.
 import matplotlib
 matplotlib.use('Agg')

@@ -1,6 +1,9 @@
-# Creates box, line, and point plots for the Spatial vs Regression PUB benchmark
-# The norm for all plots of PUB can be shown for the training and testing data
-# The difference between the following can be shown for the training and testing data:
+"""
+This code is associated to the following paper:
+
+Funato, M., Sawada, Y., "Multi-Model Ensemble and Reservoir Computing for River Discharge Prediction in Ungauged Basins".
+currently under submission
+"""
 ### BcReg and BcProx 
 
 import matplotlib

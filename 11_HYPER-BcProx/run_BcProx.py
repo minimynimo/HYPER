@@ -1,3 +1,10 @@
+"""
+This code is associated to the following paper:
+
+Funato, M., Sawada, Y., "Multi-Model Ensemble and Reservoir Computing for River Discharge Prediction in Ungauged Basins".
+currently under submission
+"""
+
 import pandas as pd
 import numpy as np
 

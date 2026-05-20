@@ -1,3 +1,10 @@
+"""
+This code is associated to the following paper:
+
+Funato, M., Sawada, Y., "Multi-Model Ensemble and Reservoir Computing for River Discharge Prediction in Ungauged Basins".
+currently under submission
+"""
+
 # Description: Main script for running the ESN model on multiple files.
 # can be used for both BMA and model-based bias correction
 import matplotlib

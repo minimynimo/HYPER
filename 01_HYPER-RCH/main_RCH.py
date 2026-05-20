@@ -1,3 +1,10 @@
+"""
+This code is associated to the following paper:
+
+Funato, M., Sawada, Y., "Multi-Model Ensemble and Reservoir Computing for River Discharge Prediction in Ungauged Basins".
+currently under submission
+"""
+
 # Description: This script is used to run for ESN with input from the ensemble BMA model for the MERV-Jp dataset.
 from esn_RCH import ESN
 import pandas as pd

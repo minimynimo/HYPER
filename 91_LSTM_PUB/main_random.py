@@ -1,5 +1,10 @@
 """
-This file is part of the accompanying code to our manuscript:
+This code is associated to the following paper:
+
+Funato, M., Sawada, Y., "Multi-Model Ensemble and Reservoir Computing for River Discharge Prediction in Ungauged Basins".
+currently under submission
+
+This file was modified from the original code associated with the following paper:
 
 Kratzert, F., Klotz, D., Herrnegger, M., Sampson, A. K., Hochreiter, S., & Nearing, G. S. ( 2019). 
 Toward improved predictions in ungauged basins: Exploiting the power of machine learning.
