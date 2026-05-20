@@ -1,3 +1,4 @@
 /out/*
 /fig/*
 **/__pycache__/*
+/90_LSTM/lstm_regional_modeling-master/*
