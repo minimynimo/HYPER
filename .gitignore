@@ -1,4 +1,6 @@
 /out/*
 /fig/*
 **/__pycache__/*
-/90_LSTM/lstm_regional_modeling-master/*
+/90_LSTM/lstm_regional_modeling-master/**/*.py
+/90_LSTM/lstm_regional_modeling-master/**/*.yml
+/90_LSTM/lstm_regional_modeling-master/**/*.sh
