@@ -122,7 +122,7 @@ if [[ -n "$N_BASINS" ]]; then
     echo "Processing $N_BASINS basins (testing mode)"
 fi
 
-run_evaluation "regional" "/data0/funato/pub2/99_work/91_LSTM/lstm_regional_modeling-master/eval_regional.py"
+run_evaluation "regional" "90_LSTM/lstm_regional_modeling-master/eval_regional.py"
 
 echo ""
 echo "========================================="
@@ -133,6 +133,6 @@ echo "Output files created with parameter string: $PARAM_STRING"
 echo ""
 
 # run using 
-# chmod +x /data0/funato/pub2/99_work/91_LSTM/lstm_regional_modeling-master/run_eval.sh
+# chmod +x 90_LSTM/lstm_regional_modeling-master/run_eval.sh
 # regional
-# nohup /data0/funato/pub2/99_work/91_LSTM/lstm_regional_modeling-master/run_eval.sh --run_dir /data0/funato/99_work/91_LSTM/lstm_regional_modeling-master/runs/run_1205_0149_seed913293 > output_eval_lstm2.log 2>&1 &
+# nohup 90_LSTM/lstm_regional_modeling-master/run_eval.sh --run_dir 90_LSTM/lstm_regional_modeling-master/runs/run_1205_0149_seed913293 > output_eval_lstm2.log 2>&1 &

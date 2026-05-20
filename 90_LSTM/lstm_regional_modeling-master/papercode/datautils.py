@@ -240,9 +240,9 @@ def load_data(file_num, varssim_dir, loc):
 
     df = pd.read_csv(file_path)
     
-    if loc == "JP":
+    try:
         df['Date'] = pd.to_datetime(df[['Year', 'Month', 'Day']])
-    else:
+    except:
         df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
 

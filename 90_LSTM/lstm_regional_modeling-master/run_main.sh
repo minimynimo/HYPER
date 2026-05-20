@@ -26,7 +26,7 @@ gpucount=1
 # Set default model to "lstm" if not provided
 model=${1:-lstm}
 
-output_dir="/data0/funato/99_work/bash_logs"
+output_dir="log"
 
 mkdir -p "$output_dir" # Create logs directory if it doesn't exist
 
@@ -55,11 +55,11 @@ for (( seed = $firstseed ; seed < $((nseeds+$firstseed)) ; seed++ )); do
         echo "Start Time: $start_time | Seed: $seed" >> "$output_dir/$log_name"
         
         if [ "$static_bool" = true ]; then  ## static data is used
-            echo "Running: taskset -c $core /data0/funato/.venv/bin/python /data0/funato/99_work/91_LSTM/lstm_regional_modeling-master/main.py train --no_static=False --concat_static=False --num_workers=$cores" >> "$output_dir/$log_name"
-            taskset -c $core /data0/funato/.venv/bin/python /data0/funato/99_work/91_LSTM/lstm_regional_modeling-master/main.py train --no_static=False --concat_static=False --num_workers=$cores > $outfile 2>> "$output_dir/$log_name" &
+            echo "Running: taskset -c $core python 90_LSTM/lstm_regional_modeling-master/main.py train --no_static=False --concat_static=False --num_workers=$cores" >> "$output_dir/$log_name"
+            taskset -c $core python 90_LSTM/lstm_regional_modeling-master/main.py train --no_static=False --concat_static=False --num_workers=$cores > $outfile 2>> "$output_dir/$log_name" &
         else  ## no static data is used
-            echo "Running: taskset -c $core /data0/funato/.venv/bin/python /data0/funato/99_work/91_LSTM/lstm_regional_modeling-master/main.py train --no_static=True --concat_static=False --num_workers=$cores" >> "$output_dir/$log_name"
-            taskset -c $core /data0/funato/.venv/bin/python /data0/funato/99_work/91_LSTM/lstm_regional_modeling-master/main.py train --no_static=True --concat_static=False --num_workers=$cores > $outfile 2>> "$output_dir/$log_name" &
+            echo "Running: taskset -c $core python 90_LSTM/lstm_regional_modeling-master/main.py train --no_static=True --concat_static=False --num_workers=$cores" >> "$output_dir/$log_name"
+            taskset -c $core python 90_LSTM/lstm_regional_modeling-master/main.py train --no_static=True --concat_static=False --num_workers=$cores > $outfile 2>> "$output_dir/$log_name" &
         fi
 
         wait # Ensure the process completes before logging end time
@@ -76,5 +76,5 @@ for (( seed = $firstseed ; seed < $((nseeds+$firstseed)) ; seed++ )); do
 done
 
 ###RUN USING####
-# chmod +x /data0/funato/99_work/91_LSTM/lstm_regional_modeling-master/run_main.sh
-# nohup /data0/funato/99_work/91_LSTM/lstm_regional_modeling-master/run_main.sh > /dev/null 2>&1 &
+# chmod +x 90_LSTM/lstm_regional_modeling-master/run_main.sh
+# nohup 90_LSTM/lstm_regional_modeling-master/run_main.sh > /dev/null 2>&1 &

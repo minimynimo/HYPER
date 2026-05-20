@@ -96,7 +96,7 @@ def file_name(input_num, total_len):
     return str(input_num).zfill(total_len)
 
 def load_data_for_basin(file_num):
-    varssim_dir = f"/data/MERVJP/varssim_nocal/{'ver1_1' if GLOBAL_SETTINGS['ver']==1 else 'ver2_0'}"
+    varssim_dir = f"data/MERVJP/varssim_nocal/{'ver1_1' if GLOBAL_SETTINGS['ver']==1 else 'ver2_0'}"
     df = pd.read_csv(f"{varssim_dir}/varssim{file_name(file_num, 3)}.csv")
     
     df['Date'] = pd.to_datetime(df['Date'])
