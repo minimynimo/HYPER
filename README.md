@@ -1,4 +1,6 @@
 # HYPER
+Funato, M., & Sawada, Y. (2026). Multi-model ensemble and reservoir computing for river discharge prediction in ungauged basins. Journal of Geophysical Research: Machine Learning and Computation, 3, e2025JH001196. https://doi.org/10.1029/2025JH001196
+
 ## Prediction in Gauged Basins
 ### 00_HYPER: HYPER-BC model
 HYPER model based on bias correction.  
